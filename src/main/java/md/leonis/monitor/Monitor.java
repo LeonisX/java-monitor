@@ -2,6 +2,7 @@ package md.leonis.monitor;
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -169,29 +170,32 @@ public class Monitor extends Application {
         stage.setScene(new Scene(pane, 1280, 1024));
         stage.show();
 
-        Timeline requestTimeline = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> getStats()));
-        requestTimeline.setCycleCount(Animation.INDEFINITE);
-        requestTimeline.play();
+        List<Timeline> timelineList = config.getTasks().stream().map(task -> {
+            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> getStats(task)));
+            timeline.setCycleCount(Animation.INDEFINITE);
+            timeline.setDelay(Duration.seconds(task.getTimeOffsetInSeconds()));
+            return timeline;
+        }).collect(Collectors.toList());
+
+        ParallelTransition pt = new ParallelTransition();
+        pt.getChildren().addAll(timelineList);
+        pt.play();
 
         Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> saveStats()));
-        /*saveTimeline.setDelay(Duration.seconds(5));
-        saveTimeline.setRate(5);*/
         saveTimeline.setCycleCount(Animation.INDEFINITE);
         saveTimeline.play();
-
-        //TODO
-        /*ParallelTransition pt = new ParallelTransition();
-        for(...) {
-            Timeline tl = new Timeline();
-            pt.getChildren().add(tl);
-        }
-        pt.play();*/
     }
 
     private void fillCharts() {
         if (canDisplay) {
             int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size());
-            List<List<Metric>> subLists = statsList.stream().map(stats -> stats.getMetrics().subList(chartOffset, toIndex)).collect(Collectors.toList());
+            List<List<Metric>> subLists = statsList.stream().map(stats -> {
+                if (toIndex > stats.getMetrics().size()) {
+                    return new ArrayList<Metric>();
+                } else {
+                    return stats.getMetrics().subList(chartOffset, toIndex);
+                }
+            }).collect(Collectors.toList());
 
             for (List<XYChart.Series<String, Long>> series : chartsDataList) {
                 for (XYChart.Series<String, Long> d : series) {
@@ -241,42 +245,38 @@ public class Monitor extends Application {
         }
     }
 
-    private void getStats() {
+    private void getStats(Task task) {
         LocalDateTime currentLocalDateTime = LocalDateTime.now();
         boolean isLast = chartOffset + (int) (chartPageSize * chartScale) >= statsList.get(0).getMetrics().size();
 
-        for (int i = 0; i < config.getTasks().size(); i++) {
-            Task task = config.getTasks().get(i);
+        Map<String, Long> map = null;
+        switch (task.getRequest()) {
+            case HTTP:
+                map = HttpSource.executeTask(task);
+                break;
 
-            Map<String, Long> map = null;
-            switch (task.getRequest()) {
-                case HTTP:
-                    map = HttpSource.executeTask(task);
-                    break;
-
-                case JDBC:
-                    map = JdbcSource.executeTask(task);
-                    break;
-            }
-
-            map = map.entrySet().stream().filter(e -> fieldsByNameMap.containsKey(e.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            Metric metric = new Metric(currentLocalDateTime, map);
-            statsList.get(i).getMetrics().add(metric);
-
-            logFieldsList.forEach(logField -> {
-                if (fieldsByNameMap.get(logField.getName()).isLogAnyChange()) {
-                    Long val = metric.getMetrics().get(logField.getName());
-                    if (null == logField.getValue()) {
-                        logField.setValue(val);
-                    } else if (!logField.getValue().equals(val) && val != null) {
-                        LOGGER.warn(String.format("%s::%s: %s -> %s", task.getName(), logField.getName(), logField.getValue(), val));
-                        logField.setValue(val);
-                    }
-                }
-            });
+            case JDBC:
+                map = JdbcSource.executeTask(task);
+                break;
         }
+
+        map = map.entrySet().stream().filter(e -> fieldsByNameMap.containsKey(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        Metric metric = new Metric(currentLocalDateTime, map);
+        statsList.get(config.getTasks().indexOf(task)).getMetrics().add(metric);
+
+        logFieldsList.forEach(logField -> {
+            if (fieldsByNameMap.get(logField.getName()).isLogAnyChange()) {
+                Long val = metric.getMetrics().get(logField.getName());
+                if (null == logField.getValue()) {
+                    logField.setValue(val);
+                } else if (!logField.getValue().equals(val) && val != null) {
+                    LOGGER.warn(String.format("%s::%s: %s -> %s", task.getName(), logField.getName(), logField.getValue(), val));
+                    logField.setValue(val);
+                }
+            }
+        });
 
         if (isLast) {
             chartOffset = Math.max(0, statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));

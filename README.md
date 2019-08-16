@@ -71,6 +71,7 @@ tasks:
   # WildFly, DataSource
   - name: DataSource
     request: HTTP
+    timeOffsetInSeconds = 0
     url: 'http://localhost:9990/management/subsystem/datasources/data-source/testDS/statistics/pool?read-resource&include-runtime=true&recursive&json.pretty'
     authentication:
       type: DIGEST
@@ -97,6 +98,8 @@ and there is no desire to clutter up the charts.
 
 * `name`: task name. It is displayed in the console logs and also serves as the file name for saving metrics.
 * `request`: `HTTP`. Everything is clear here. Another possible meaning: `JDBC`.
+* `timeOffsetInSeconds`. The offset of the request execution time relative to the total execution time. 
+It makes sense to execute some queries later than others. The default is `0`.
 * `authentication.type`: authentication type. `NONE`, `BASIC`, `DIGEST`, `PASSWORD`. `BASIC` is generally the same as `PASSWORD`,
 but the `Authentication` header (http client bug) is forcibly set.
 * `responseFormat`: `JSON`. It is set when we know that the server returns metrics in the `Json` format.
@@ -115,6 +118,7 @@ Everything is simple here, we just need to add that the metrics are obtained by 
   # MySQL address
   - name: MySql
     request: JDBC
+    timeOffsetInSeconds = 0
     url: 'jdbc:mysql://localhost:3306/mydb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC'
     authentication:
       type: PASSWORD
@@ -144,6 +148,7 @@ In case of any crash, messages will also be displayed in the console.
   # Business request
   - name: Request
     request: HTTP
+    timeOffsetInSeconds = 0
     url: 'http://translate.google.com/?hl=ru#view=home&op=translate&sl=en&tl=ru&text=This%20is%20an%20example'
     authentication:
       type: BASIC
@@ -192,8 +197,6 @@ Wishlist
 
 * autorun
 * Size in config
-* Request offset in config
-* Requests offset
 * Height settings in config
 
 #### Other

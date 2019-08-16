@@ -6,6 +6,7 @@ public class Task {
 
     private String name;
     private TaskType request;
+    private Integer timeOffsetInSeconds = 0;
     private String url;
     private Authentication authentication;
     private ResponseFormat responseFormat;
@@ -17,6 +18,14 @@ public class Task {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getTimeOffsetInSeconds() {
+        return timeOffsetInSeconds;
+    }
+
+    public void setTimeOffsetInSeconds(Integer timeOffsetInSeconds) {
+        this.timeOffsetInSeconds = timeOffsetInSeconds;
     }
 
     public TaskType getRequest() {

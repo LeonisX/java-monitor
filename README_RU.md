@@ -71,6 +71,7 @@ tasks:
   # WildFly, DataSource
   - name: DataSource
     request: HTTP
+    timeOffsetInSeconds = 0
     url: 'http://localhost:9990/management/subsystem/datasources/data-source/testDS/statistics/pool?read-resource&include-runtime=true&recursive&json.pretty'
     authentication:
       type: DIGEST
@@ -97,6 +98,8 @@ tasks:
 
 * `name`: название задачи. Отображается в логах консоли, так же служит именем файла для сохранения метрик.
 * `request`: `HTTP`. Тут всё понятно. Другое возможное значение: `JDBC`.
+* `timeOffsetInSeconds`. Смещение времени выполнения запроса относительно общего времени выполнения. 
+Имеет смысл выполнять некоторые запросы позже других. По умолчанию `0`.
 * `authentication.type`: тип аутентификации. `NONE`, `BASIC`, `DIGEST`, `PASSWORD`. `BASIC` в целом то же самое, что и `PASSWORD`, 
 но принудительно устанавливается заголовок `Authentication` (баг http-клиента).
 * `responseFormat`: `JSON`. Устанавливается, когда мы знаем, что сервер возвращает метрики в `Json` формате. 
@@ -115,6 +118,7 @@ tasks:
   # MySQL address
   - name: MySql
     request: JDBC
+    timeOffsetInSeconds = 0
     url: 'jdbc:mysql://localhost:3306/mydb?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC'
     authentication:
       type: PASSWORD
@@ -144,6 +148,7 @@ tasks:
   # Business request
   - name: Request
     request: HTTP
+    timeOffsetInSeconds = 0
     url: 'http://translate.google.com/?hl=ru#view=home&op=translate&sl=en&tl=ru&text=This%20is%20an%20example'
     authentication:
       type: BASIC
