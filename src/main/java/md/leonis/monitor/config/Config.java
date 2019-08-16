@@ -6,6 +6,8 @@ import java.util.List;
 public class Config {
 
     private int requestIntervalInSeconds = 30;
+    private int saveStateIntervalInSeconds = 600;
+
     private GuiConfig gui = new GuiConfig();
     private List<Task> tasks = new ArrayList<>();
 
@@ -15,6 +17,14 @@ public class Config {
 
     public void setRequestIntervalInSeconds(int requestIntervalInSeconds) {
         this.requestIntervalInSeconds = requestIntervalInSeconds;
+    }
+
+    public int getSaveStateIntervalInSeconds() {
+        return saveStateIntervalInSeconds;
+    }
+
+    public void setSaveStateIntervalInSeconds(int saveStateIntervalInSeconds) {
+        this.saveStateIntervalInSeconds = saveStateIntervalInSeconds;
     }
 
     public GuiConfig getGui() {

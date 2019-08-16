@@ -40,6 +40,7 @@ All settings are collected in the `config.yml` file. `YAML` allows us to conveni
 #### General settings
 
 * `requestIntervalInSeconds`: requests interval in seconds. Default `30`.
+* `saveStateIntervalInSeconds`: interval of saving settings and metrics in seconds. Default `600` (10 minutes).
 
 #### Interface Settings
 
@@ -190,17 +191,13 @@ Wishlist
 #### Config
 
 * autorun
-* Config fallback: saved -> standard -> default
-* Default config in resources
 * Size in config
 * Request offset in config
 * Requests offset
-* Save interval in config
 * Height settings in config
 
 #### Other
 
-* build ZIP archive with all necessary files (see mdm-monitoring)
 * Log path of loaded config
 * chart ID as custom string. Test
 * Path to dumps (test remote too)
@@ -208,6 +205,7 @@ Wishlist
 * Dynamic height
 * Manual height
 * Console-only version
+* build ZIP archive with all necessary files (see mdm-monitoring)
 
 Where to read about metrics
 ---------------------------

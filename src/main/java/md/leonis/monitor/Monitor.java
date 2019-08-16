@@ -173,9 +173,9 @@ public class Monitor extends Application {
         requestTimeline.setCycleCount(Animation.INDEFINITE);
         requestTimeline.play();
 
-        Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(10), ae -> saveStats()));
-        saveTimeline.setDelay(Duration.seconds(5));
-        saveTimeline.setRate(5);
+        Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> saveStats()));
+        /*saveTimeline.setDelay(Duration.seconds(5));
+        saveTimeline.setRate(5);*/
         saveTimeline.setCycleCount(Animation.INDEFINITE);
         saveTimeline.play();
 
