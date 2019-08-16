@@ -29,6 +29,8 @@ import md.leonis.monitor.model.Metric;
 import md.leonis.monitor.model.Stats;
 import md.leonis.monitor.source.HttpSource;
 import md.leonis.monitor.source.JdbcSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,7 +41,11 @@ import java.util.stream.Collectors;
 
 public class Monitor extends Application {
 
+    private static final Log LOGGER = LogFactory.getLog(FileUtils.class);
+
     private static Config config = ConfigHolder.getInstance();
+
+    private static final String NO_TASKS = "No monitoring tasks. Please, setup config.yml file.";
 
     private List<Stats> statsList;
     private List<LineChart> chartList;
@@ -51,8 +57,8 @@ public class Monitor extends Application {
 
     private List<LogField> logFieldsList = new ArrayList<>();
 
-    private double chartScale = config.getUi().getHorizontalScale();
-    private int chartPageSize = config.getUi().getPageSize();
+    private double chartScale = config.getGui().getHorizontalScale();
+    private int chartPageSize = config.getGui().getPageSize();
     private int chartOffset = 0;
 
     private Label offsetLabel = new Label();
@@ -62,14 +68,14 @@ public class Monitor extends Application {
 
     @Override
     public void start(Stage stage) {
-        Utils.disableApacheHttpLogs();
+        LoggerUtils.disableApacheHttpLogs();
 
-        statsList = config.getTasks().stream().map(task -> Utils.load(task.getName())).collect(Collectors.toList());
+        statsList = config.getTasks().stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
 
         canDisplay = !statsList.isEmpty();
 
         // List of LineChart
-        chartList = config.getUi().getCharts().stream().map(chart ->
+        chartList = config.getGui().getCharts().stream().map(chart ->
                 createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickCount())
         ).collect(Collectors.toList());
 
@@ -100,14 +106,15 @@ public class Monitor extends Application {
 
         TabPane tabPane = new TabPane();
         for (int i = 0; i < chartList.size(); i++) {
-            tabPane.getTabs().add(newTab(config.getUi().getCharts().get(i).getName(), chartList.get(i)));
+            tabPane.getTabs().add(newTab(config.getGui().getCharts().get(i).getName(), chartList.get(i)));
         }
 
         BorderPane pane = new BorderPane();
         if (canDisplay) {
             pane.setCenter(tabPane);
         } else {
-            pane.setCenter(new Label("No monitoring tasks. Please, setup config.yml file."));
+            LOGGER.warn(NO_TASKS);
+            pane.setCenter(new Label(NO_TASKS));
         }
 
         Button fastBackward = new Button(" <<< ");
@@ -283,8 +290,10 @@ public class Monitor extends Application {
 
     private void saveStats() {
         for (int i = 0; i < statsList.size(); i++) {
-            Utils.save(config.getTasks().get(i).getName(), statsList.get(i));
+            FileUtils.saveStats(config.getTasks().get(i).getName(), statsList.get(i));
         }
-        System.out.println("Stats saved.");
+
+        FileUtils.saveConfig(config);
+        LOGGER.info("Stats and config saved.");
     }
 }

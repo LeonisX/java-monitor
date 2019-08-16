@@ -2,7 +2,7 @@ package md.leonis.monitor.source;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import md.leonis.monitor.Utils;
+import md.leonis.monitor.FileUtils;
 import md.leonis.monitor.config.Authentication;
 import md.leonis.monitor.config.Task;
 import org.apache.http.HttpResponse;
@@ -54,7 +54,7 @@ public class HttpSource {
             case DIGEST:
                 provider = new BasicCredentialsProvider();
                 credentials = new UsernamePasswordCredentials(auth.getUserName(), auth.getPassword());
-                AuthScope authScope = new AuthScope(auth.getParams().get("host"), Integer.parseInt(auth.getParams().get("port")), auth.getParams().get("realm"));
+                AuthScope authScope = new AuthScope((String) auth.getParams().get("host"), (int) auth.getParams().get("port"), (String) auth.getParams().get("realm"));
                 provider.setCredentials(authScope, credentials);
                 break;
         }
@@ -93,7 +93,7 @@ public class HttpSource {
                 throw new RuntimeException("status: " + response.getStatusLine() + "; responseBody: " + responseBody);
             }
 
-            Map<String, Long> map = Utils.secureMap(new ObjectMapper().readValue(responseBody, new TypeReference<Map<String, String>>() {
+            Map<String, Long> map = FileUtils.secureMap(new ObjectMapper().readValue(responseBody, new TypeReference<Map<String, String>>() {
             }));
 
             EntityUtils.consume(response.getEntity());

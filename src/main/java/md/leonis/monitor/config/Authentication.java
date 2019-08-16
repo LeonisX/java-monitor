@@ -7,7 +7,7 @@ public class Authentication {
     private AuthenticationType type;
     private String userName;
     private String password;
-    private Map<String, String> params;
+    private Map<String, Object> params;
 
     public AuthenticationType getType() {
         return type;
@@ -33,11 +33,11 @@ public class Authentication {
         this.password = password;
     }
 
-    public Map<String, String> getParams() {
+    public Map<String, Object> getParams() {
         return params;
     }
 
-    public void setParams(Map<String, String> params) {
+    public void setParams(Map<String, Object> params) {
         this.params = params;
     }
 }

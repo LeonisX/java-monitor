@@ -6,7 +6,7 @@ import java.util.List;
 public class Config {
 
     private int requestIntervalInSeconds = 30;
-    private UIConfig ui = new UIConfig();
+    private GuiConfig gui = new GuiConfig();
     private List<Task> tasks = new ArrayList<>();
 
     public int getRequestIntervalInSeconds() {
@@ -17,12 +17,12 @@ public class Config {
         this.requestIntervalInSeconds = requestIntervalInSeconds;
     }
 
-    public UIConfig getUi() {
-        return ui;
+    public GuiConfig getGui() {
+        return gui;
     }
 
-    public void setUi(UIConfig ui) {
-        this.ui = ui;
+    public void setGui(GuiConfig gui) {
+        this.gui = gui;
     }
 
     public List<Task> getTasks() {

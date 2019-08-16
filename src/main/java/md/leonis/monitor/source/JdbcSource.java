@@ -1,6 +1,6 @@
 package md.leonis.monitor.source;
 
-import md.leonis.monitor.Utils;
+import md.leonis.monitor.FileUtils;
 import md.leonis.monitor.config.Task;
 
 import java.sql.*;
@@ -26,6 +26,6 @@ public class JdbcSource {
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return Utils.secureMap(safeMap);
+        return FileUtils.secureMap(safeMap);
     }
 }
