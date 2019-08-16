@@ -143,6 +143,7 @@ public class Monitor extends Application {
         Button plus = new Button(" + ");
         plus.setOnAction(e -> {
             chartScale *= 2;
+            config.getGui().setHorizontalScale(chartScale);
             chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
@@ -150,6 +151,7 @@ public class Monitor extends Application {
         Button minus = new Button(" - ");
         minus.setOnAction(e -> {
             chartScale /= 2;
+            config.getGui().setHorizontalScale(chartScale);
             fillCharts();
         });
 

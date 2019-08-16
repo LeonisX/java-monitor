@@ -5,15 +5,15 @@ import java.util.List;
 
 public class GuiConfig {
 
-    private int horizontalScale = 1;
+    private double horizontalScale = 1;
     private int pageSize = 200;
     private List<Chart> charts = new ArrayList<>();
 
-    public int getHorizontalScale() {
+    public double getHorizontalScale() {
         return horizontalScale;
     }
 
-    public void setHorizontalScale(int horizontalScale) {
+    public void setHorizontalScale(double horizontalScale) {
         this.horizontalScale = horizontalScale;
     }
 

@@ -44,7 +44,8 @@ All settings are collected in the `config.yml` file. `YAML` allows us to conveni
 #### Interface Settings
 
 * `ui.horizontalScale` and` ui.pageSize` control the horizontal density of data display.
-Default values: 1 and 200, respectively. Metrics display count: `horizontalScale * pageSize`.
+Default values: `1` and `200`, respectively. Metrics display count: `horizontalScale * pageSize`. 
+At runtime `pageSize` value doesn't change runtime. Only `horizontalScale`.
 
 * `charts`: setting up one or more line charts.
   * `id`: chart identifier. Separate metrics will be attached to it. Example: `0`,` 1`, `2`, ...
