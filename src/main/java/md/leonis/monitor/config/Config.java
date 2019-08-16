@@ -1,12 +1,13 @@
 package md.leonis.monitor.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
 
-    private int requestIntervalInSeconds;
-    private UIConfig ui;
-    private List<Task> tasks;
+    private int requestIntervalInSeconds = 30;
+    private UIConfig ui = new UIConfig();
+    private List<Task> tasks = new ArrayList<>();
 
     public int getRequestIntervalInSeconds() {
         return requestIntervalInSeconds;

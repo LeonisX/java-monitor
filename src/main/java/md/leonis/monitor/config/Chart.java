@@ -4,9 +4,9 @@ public class Chart {
 
     private String id;
     private String name;
-    private int lowerBound;
-    private int upperBound;
-    private int tickCount;
+    private int lowerBound = 0;
+    private int upperBound = 200;
+    private int tickCount = 1;
 
     public String getId() {
         return id;

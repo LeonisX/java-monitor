@@ -39,31 +39,19 @@ All settings are collected in the `config.yml` file. `YAML` allows us to conveni
 
 #### General settings
 
-* `requestIntervalInSeconds`: requests interval in seconds.
-
-#### Настройки интерфейса
-
-* `ui.horizontalScale` и `ui.pageSize` регулируют плотность отображения данных по горизонтали. 
-Можно оставить 1 и 200 соответственно.
-
-* `charts`: настройка одного или нескольких линейных графиков.
-  * `id`: идентификатор графика. К нему будут привязаны отдельные характеристики. Пример: `0`, `1`, `2`, ...
-  * `name`: название панели, на которой будет отображаться график.
-  * `lowerBound`: нижняя граница значений графика. Есть смысл оставить 0.
-  * `upperBound`: верхняя граница значений графика. Настраивается под конкретные нужды. Например 200.
-  * `tickCount`: частота горизонтальной "сетки" на графике.
+* `requestIntervalInSeconds`: requests interval in seconds. Default `30`.
 
 #### Interface Settings
 
 * `ui.horizontalScale` and` ui.pageSize` control the horizontal density of data display.
-We can leave 1 and 200, respectively.
+Default values: 1 and 200, respectively. Metrics display count: `horizontalScale * pageSize`.
 
 * `charts`: setting up one or more line charts.
   * `id`: chart identifier. Separate metrics will be attached to it. Example: `0`,` 1`, `2`, ...
   * `name`: the name of the panel on which the chart will be displayed.
-  * `lowerBound`: the lower bound of the chart values. It makes sense to leave 0.
-  * `upperBound`: the upper bound of the chart values. Customizable to your specific needs. For example 200.
-  * `tickCount`: the frequency of the horizontal grid in the chart.
+  * `lowerBound`: the lower bound of the chart values. Default: `0`.
+  * `upperBound`: the upper bound of the chart values. Default `200`.
+  * `tickCount`: the frequency of the horizontal grid in the chart. Default: `1`
 
 #### Setup tasks
 
@@ -198,10 +186,26 @@ Used technologies
 Wishlist
 --------
 
+#### Config
+
+* autorun
+* Config fallback: saved -> standard -> default
+* Default config in resources
+* Size in config
+* Request offset in config
+* Requests offset
 * Save interval in config
+* Height settings in config
+
+#### Other
+
+* Logs everywhere
+* Log path of loaded config
+* chart ID as custom string. Test
+* Path to dumps (test remote too)
+* Manual Play/Stop
 * Dynamic height
 * Manual height
-* Height settings in config
 * Console-only version
 
 Where to read about metrics

@@ -1,12 +1,13 @@
 package md.leonis.monitor.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UIConfig {
 
-    private int horizontalScale;
-    private int pageSize;
-    private List<Chart> charts;
+    private int horizontalScale = 1;
+    private int pageSize = 200;
+    private List<Chart> charts = new ArrayList<>();
 
     public int getHorizontalScale() {
         return horizontalScale;

@@ -45,7 +45,7 @@ public class Monitor extends Application {
     private List<LineChart> chartList;
 
     private Map<String, Field> fieldsByNameMap = new HashMap<>();
-    private Map<String, Field> chartFieldsByNameMap = new HashMap<>();
+    private Map<String, Field> chartFieldsByNameMap = new HashMap<>(); // Only fields for charts
 
     private List<List<XYChart.Series<String, Long>>> chartsDataList;
 
@@ -53,10 +53,12 @@ public class Monitor extends Application {
 
     private double chartScale = config.getUi().getHorizontalScale();
     private int chartPageSize = config.getUi().getPageSize();
-    private int chartOffset;
+    private int chartOffset = 0;
 
     private Label offsetLabel = new Label();
     private Label pageLabel = new Label();
+
+    private boolean canDisplay;
 
     @Override
     public void start(Stage stage) {
@@ -64,12 +66,16 @@ public class Monitor extends Application {
 
         statsList = config.getTasks().stream().map(task -> Utils.load(task.getName())).collect(Collectors.toList());
 
+        canDisplay = !statsList.isEmpty();
+
         // List of LineChart
         chartList = config.getUi().getCharts().stream().map(chart ->
                 createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickCount())
         ).collect(Collectors.toList());
 
-        chartOffset = Math.max(0, statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+        if (canDisplay) {
+            chartOffset = Math.max(0, statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+        }
 
         // List of lists of Series data
         chartsDataList = chartList.stream().map(c -> new ArrayList<XYChart.Series<String, Long>>()).collect(Collectors.toList());
@@ -98,7 +104,11 @@ public class Monitor extends Application {
         }
 
         BorderPane pane = new BorderPane();
-        pane.setCenter(tabPane);
+        if (canDisplay) {
+            pane.setCenter(tabPane);
+        } else {
+            pane.setCenter(new Label("No monitoring tasks. Please, setup config.yml file."));
+        }
 
         Button fastBackward = new Button(" <<< ");
         fastBackward.setOnAction(e -> {
@@ -111,12 +121,6 @@ public class Monitor extends Application {
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
-        Button plus = new Button(" + ");
-        plus.setOnAction(e -> {
-            chartScale /= 2;
-            fillCharts();
-        });
-
         Button fastForward = new Button(" >>> ");
         fastForward.setOnAction(e -> {
             chartOffset = statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale);
@@ -129,15 +133,23 @@ public class Monitor extends Application {
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
-        Button minus = new Button(" - ");
-        minus.setOnAction(e -> {
+        Button plus = new Button(" + ");
+        plus.setOnAction(e -> {
             chartScale *= 2;
             chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
+        Button minus = new Button(" - ");
+        minus.setOnAction(e -> {
+            chartScale /= 2;
+            fillCharts();
+        });
 
         HBox hBox = new HBox(fastBackward, backward, forward, fastForward, offsetLabel, plus, minus, pageLabel);
+
+        hBox.getChildren().forEach(c -> c.setDisable(!canDisplay));
+
         hBox.setAlignment(Pos.CENTER);
         hBox.setSpacing(5);
         hBox.setPadding(new Insets(0,0,5,0));
@@ -153,25 +165,37 @@ public class Monitor extends Application {
         requestTimeline.play();
 
         Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(10), ae -> saveStats()));
+        saveTimeline.setDelay(Duration.seconds(5));
+        saveTimeline.setRate(5);
         saveTimeline.setCycleCount(Animation.INDEFINITE);
         saveTimeline.play();
+
+        //TODO
+        /*ParallelTransition pt = new ParallelTransition();
+        for(...) {
+            Timeline tl = new Timeline();
+            pt.getChildren().add(tl);
+        }
+        pt.play();*/
     }
 
     private void fillCharts() {
-        int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size());
-        List<List<Metric>> subLists = statsList.stream().map(stats -> stats.getMetrics().subList(chartOffset, toIndex)).collect(Collectors.toList());
+        if (canDisplay) {
+            int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size());
+            List<List<Metric>> subLists = statsList.stream().map(stats -> stats.getMetrics().subList(chartOffset, toIndex)).collect(Collectors.toList());
 
-        for (List<XYChart.Series<String, Long>> series : chartsDataList) {
-            for (XYChart.Series<String, Long> d : series) {
-                String name = d.getName();
-                d.getData().clear();
-                d.getData().addAll(subLists.get(chartFieldsByNameMap.get(name).getChartId()).stream().map(s -> new XYChart.Data<>(s.toString(), s.getMetrics().get(name))).collect(Collectors.toList()));
+            for (List<XYChart.Series<String, Long>> series : chartsDataList) {
+                for (XYChart.Series<String, Long> d : series) {
+                    String name = d.getName();
+                    d.getData().clear();
+                    d.getData().addAll(subLists.get(chartFieldsByNameMap.get(name).getChartId()).stream().map(s -> new XYChart.Data<>(s.toString(), s.getMetrics().get(name))).collect(Collectors.toList()));
 
+                }
             }
-        }
 
-        offsetLabel.setText(String.format("[%s - %s] of %s", chartOffset, toIndex, statsList.get(0).getMetrics().size()));
-        pageLabel.setText(String.format("Page size: %s", (int) (chartPageSize * chartScale)));
+            offsetLabel.setText(String.format("[%s - %s] of %s", chartOffset, toIndex, statsList.get(0).getMetrics().size()));
+            pageLabel.setText(String.format("Page size: %s", (int) (chartPageSize * chartScale)));
+        }
     }
 
     private Tab newTab(String name, LineChart chart) {

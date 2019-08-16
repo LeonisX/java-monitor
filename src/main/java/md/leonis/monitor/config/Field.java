@@ -4,7 +4,7 @@ public class Field {
 
     private String name;
     private Integer chartId;
-    private boolean logAnyChange;
+    private boolean logAnyChange = false;
 
     public String getName() {
         return name;
