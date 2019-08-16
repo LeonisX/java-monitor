@@ -72,7 +72,7 @@ public class HttpSource {
                 case JSON:
                     return readJson(response);
                 case STATUS_CODE_ONLY:
-                    return readStatusOnly(response);
+                    return readStatusOnly(response, task.getName());
                 default:
                     throw new RuntimeException(String.format("Can't process %s data type :(", task.getResponseFormat()));
             }
@@ -102,9 +102,9 @@ public class HttpSource {
         }
     }
 
-    private static Map<String, Long> readStatusOnly(HttpResponse response) throws IOException {
+    private static Map<String, Long> readStatusOnly(HttpResponse response, String name) throws IOException {
         Map<String, Long> map = new HashMap<>();
-        map.put(STATUS_CODE, (long) response.getStatusLine().getStatusCode());
+        map.put(String.format("%s_%s", name, STATUS_CODE), (long) response.getStatusLine().getStatusCode());
         EntityUtils.consume(response.getEntity());
         retryCount = 0;
         return map;

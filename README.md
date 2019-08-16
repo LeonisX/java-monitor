@@ -103,7 +103,7 @@ to make sure the project is still alive.
 
 ##### WildFly
 
-```
+```yaml
 tasks:
   # WildFly, DataSource
   - name: DataSource
@@ -151,7 +151,7 @@ Specifically need `Digest Authentication`.
 
 Everything is simple here, we just need to add that the metrics are obtained by the following query: `SHOW GLOBAL STATUS LIKE '%%'`.
 
-```
+```yaml
   # MySQL address
   - name: MySql
     request: JDBC
@@ -181,7 +181,10 @@ The server line of life will be displayed on `chart-2`.
 
 In case of any crash, messages will also be displayed in the console.
 
-```
+Note the name of the field `Request_StatusCode`. This is the `task name` + `"_StatusCode"`.
+If called incorrectly, there will be errors. These difficulties are associated with the features of the `Map` collection.
+
+```yaml
   # Business request
   - name: Request
     request: HTTP
@@ -193,7 +196,7 @@ In case of any crash, messages will also be displayed in the console.
       password: 'password'
     responseFormat: STATUS_CODE_ONLY
     fields:
-      - name: StatusCode
+      - name: Request_StatusCode
         chartId: 2
         logAnyChange: true
 ```
@@ -233,14 +236,9 @@ Used technologies
 Wishlist
 --------
 
-#### Config
-
-* autorun
-
-#### Other
 
 * Path to dumps (test remote too)
-* Manual Play/Stop
+* Autorun. Manual Play/Stop
 * Console-only version
 * build ZIP archive with all necessary files (see mdm-monitoring)
 

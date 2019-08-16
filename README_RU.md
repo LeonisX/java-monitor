@@ -181,6 +181,9 @@ tasks:
 
 В случае любого падения сообщения так же будут выведены в консоль.
 
+Обратите внимание на название поля `Request_StatusCode`. Это `название задачи` + `"_StatusCode"`. 
+Если назвать неправильно, то будут ошибки. Эти трудности связаны с особенностями работы коллекции `Map`.
+
 ```yaml
   # Business request
   - name: Request
@@ -193,7 +196,7 @@ tasks:
       password: 'password'
     responseFormat: STATUS_CODE_ONLY
     fields:
-      - name: StatusCode
+      - name: Request_StatusCode
         chartId: 2
         logAnyChange: true
 ```
