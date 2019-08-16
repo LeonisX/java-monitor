@@ -22,6 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import md.leonis.monitor.config.Chart;
 import md.leonis.monitor.config.Config;
 import md.leonis.monitor.config.Field;
 import md.leonis.monitor.config.Task;
@@ -49,7 +50,8 @@ public class Monitor extends Application {
     private static final String NO_TASKS = "No monitoring tasks. Please, setup config.yml file.";
 
     private List<Stats> statsList;
-    private List<LineChart> chartList;
+    private List<LineChart> chartList = new ArrayList<>();
+    private Map<String, Integer> chartsByIdMap = new HashMap<>();
 
     private Map<String, Field> fieldsByNameMap = new HashMap<>();
     private Map<String, Field> chartFieldsByNameMap = new HashMap<>(); // Only fields for charts
@@ -76,9 +78,11 @@ public class Monitor extends Application {
         canDisplay = !statsList.isEmpty();
 
         // List of LineChart
-        chartList = config.getGui().getCharts().stream().map(chart ->
-                createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickCount())
-        ).collect(Collectors.toList());
+        for (int i = 0; i < config.getGui().getCharts().size(); i++) {
+            Chart chart = config.getGui().getCharts().get(i);
+            chartList.add(createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickCount()));
+            chartsByIdMap.put(chart.getId(), i);
+        }
 
         if (canDisplay) {
             chartOffset = Math.max(0, statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
@@ -89,7 +93,8 @@ public class Monitor extends Application {
         config.getTasks().forEach(task ->
                 task.getFields().forEach(field -> {
                     if (field.getChartId() != null) {
-                        chartsDataList.get(field.getChartId()).add(new XYChart.Series<>(field.getName(), FXCollections.observableArrayList()));
+                        Integer chartId = chartsByIdMap.get(field.getChartId());
+                        chartsDataList.get(chartId).add(new XYChart.Series<>(field.getName(), FXCollections.observableArrayList()));
                     }
                     if (field.isLogAnyChange()) {
                         logFieldsList.add(new LogField(field.getName(), null));
@@ -201,8 +206,8 @@ public class Monitor extends Application {
                 for (XYChart.Series<String, Long> d : series) {
                     String name = d.getName();
                     d.getData().clear();
-                    d.getData().addAll(subLists.get(chartFieldsByNameMap.get(name).getChartId()).stream().map(s -> new XYChart.Data<>(s.toString(), s.getMetrics().get(name))).collect(Collectors.toList()));
-
+                    Integer chartId = chartsByIdMap.get(chartFieldsByNameMap.get(name).getChartId());
+                    d.getData().addAll(subLists.get(chartId).stream().map(s -> new XYChart.Data<>(s.toString(), s.getMetrics().get(name))).collect(Collectors.toList()));
                 }
             }
 

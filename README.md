@@ -49,7 +49,7 @@ Default values: `1` and `200`, respectively. Metrics display count: `horizontalS
 At runtime `pageSize` value doesn't change runtime. Only `horizontalScale`.
 
 * `charts`: setting up one or more line charts.
-  * `id`: chart identifier. Separate metrics will be attached to it. Example: `0`,` 1`, `2`, ...
+  * `id`: chart identifier. Separate metrics will be attached to it. Example: `0`,` 1`, `2`, ... String values are allowed.
   * `name`: the name of the panel on which the chart will be displayed.
   * `lowerBound`: the lower bound of the chart values. Default: `0`.
   * `upperBound`: the upper bound of the chart values. Default `200`.
@@ -202,7 +202,6 @@ Wishlist
 #### Other
 
 * Log path of loaded config
-* chart ID as custom string. Test
 * Path to dumps (test remote too)
 * Manual Play/Stop
 * Dynamic height

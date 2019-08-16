@@ -3,7 +3,7 @@ package md.leonis.monitor.config;
 public class Field {
 
     private String name;
-    private Integer chartId;
+    private String chartId;
     private boolean logAnyChange = false;
 
     public String getName() {
@@ -14,11 +14,11 @@ public class Field {
         this.name = name;
     }
 
-    public Integer getChartId() {
+    public String getChartId() {
         return chartId;
     }
 
-    public void setChartId(Integer chartId) {
+    public void setChartId(String chartId) {
         this.chartId = chartId;
     }
 
