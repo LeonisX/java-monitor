@@ -53,7 +53,7 @@ At runtime `pageSize` value doesn't change runtime. Only `horizontalScale`.
   * `name`: the name of the panel on which the chart will be displayed.
   * `lowerBound`: the lower bound of the chart values. Default: `0`.
   * `upperBound`: the upper bound of the chart values. Default `200`.
-  * `tickCount`: the frequency of the horizontal grid in the chart. Default: `1`
+  * `tickUnit`: the frequency of the horizontal grid in the chart. Default: `1`
 
 #### Setup tasks
 
@@ -167,6 +167,9 @@ Using
 The utility periodically saves metrics at a specified time interval. Also, saving occurs on exit.
 
 The UI is intuitive and allows you to flexibly scale data by grouping them on several panels.
+Dynamically, you can change the page size and also select the required data range.
+
+The values of `upperBound` and` tickUnit` can also be changed dynamically.
 
 Debugging
 ---------
@@ -197,15 +200,11 @@ Wishlist
 
 * autorun
 * Size in config
-* Height settings in config
 
 #### Other
 
-* Log path of loaded config
 * Path to dumps (test remote too)
 * Manual Play/Stop
-* Dynamic height
-* Manual height
 * Console-only version
 * build ZIP archive with all necessary files (see mdm-monitoring)
 

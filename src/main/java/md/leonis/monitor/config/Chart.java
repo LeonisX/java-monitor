@@ -6,7 +6,7 @@ public class Chart {
     private String name;
     private int lowerBound = 0;
     private int upperBound = 200;
-    private int tickCount = 1;
+    private int tickUnit = 1;
 
     public String getId() {
         return id;
@@ -40,11 +40,11 @@ public class Chart {
         this.upperBound = upperBound;
     }
 
-    public int getTickCount() {
-        return tickCount;
+    public int getTickUnit() {
+        return tickUnit;
     }
 
-    public void setTickCount(int tickCount) {
-        this.tickCount = tickCount;
+    public void setTickUnit(int tickUnit) {
+        this.tickUnit = tickUnit;
     }
 }

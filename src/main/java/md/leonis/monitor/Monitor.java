@@ -13,10 +13,7 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -31,6 +28,7 @@ import md.leonis.monitor.model.Metric;
 import md.leonis.monitor.model.Stats;
 import md.leonis.monitor.source.HttpSource;
 import md.leonis.monitor.source.JdbcSource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class Monitor extends Application {
@@ -64,6 +63,9 @@ public class Monitor extends Application {
     private int chartPageSize = config.getGui().getPageSize();
     private int chartOffset = 0;
 
+    private TextField upperBoundTextField = new TextField();
+    private TextField tickUnitTextField = new TextField();
+
     private Label offsetLabel = new Label();
     private Label pageLabel = new Label();
 
@@ -80,7 +82,7 @@ public class Monitor extends Application {
         // List of LineChart
         for (int i = 0; i < config.getGui().getCharts().size(); i++) {
             Chart chart = config.getGui().getCharts().get(i);
-            chartList.add(createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickCount()));
+            chartList.add(createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickUnit()));
             chartsByIdMap.put(chart.getId(), i);
         }
 
@@ -112,8 +114,16 @@ public class Monitor extends Application {
 
         TabPane tabPane = new TabPane();
         for (int i = 0; i < chartList.size(); i++) {
-            tabPane.getTabs().add(newTab(config.getGui().getCharts().get(i).getName(), chartList.get(i)));
+            Tab tab = newTab(config.getGui().getCharts().get(i).getName(), chartList.get(i));
+            tab.setId(String.valueOf(i));
+            tabPane.getTabs().add(tab);
         }
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener(
+                (ov, prevTab, newTab) -> showTabStats(Integer.parseInt(newTab.getId()))
+        );
+
+        showTabStats(0);
 
         BorderPane pane = new BorderPane();
         if (canDisplay) {
@@ -161,16 +171,59 @@ public class Monitor extends Application {
             fillCharts();
         });
 
-        HBox hBox = new HBox(fastBackward, backward, forward, fastForward, offsetLabel, plus, minus, pageLabel);
+        offsetLabel.setPadding(new Insets(0, 30, 0, 0));
+
+        Label upperBoundLabel = new Label("Chart Upper Bound:");
+
+        UnaryOperator<TextFormatter.Change> integerFilter = change -> {
+            String input = change.getText();
+            if (input.matches("[0-9]*")) {
+                return change;
+            }
+            return null;
+        };
+
+        upperBoundTextField.setTextFormatter(new TextFormatter<String>(integerFilter));
+        upperBoundTextField.setPrefWidth(60);
+
+        upperBoundTextField.setOnKeyReleased(value -> {
+            if (StringUtils.isNotBlank(upperBoundTextField.getText())) {
+                int newValue = Integer.parseInt(upperBoundTextField.getText());
+                int chartId = Integer.parseInt(tabPane.getSelectionModel().getSelectedItem().getId());
+                ((NumberAxis) chartList.get(chartId).getYAxis()).setUpperBound(newValue);
+                config.getGui().getCharts().get(chartId).setUpperBound(newValue);
+            }
+        });
+
+        Label separator1 = new Label();
+        separator1.setPadding(new Insets(0, 0, 0, 30));
+
+        Label tickUnitLabel = new Label("Chart Tick Unit:");
+
+        tickUnitTextField.setTextFormatter(new TextFormatter<String>(integerFilter));
+        tickUnitTextField.setPrefWidth(60);
+
+        tickUnitTextField.setOnKeyReleased(value -> {
+            if (StringUtils.isNotBlank(tickUnitTextField.getText())) {
+                int newValue = Integer.parseInt(tickUnitTextField.getText());
+                int chartId = Integer.parseInt(tabPane.getSelectionModel().getSelectedItem().getId());
+                ((NumberAxis) chartList.get(chartId).getYAxis()).setTickUnit(newValue);
+                config.getGui().getCharts().get(chartId).setTickUnit(newValue);
+            }
+        });
+
+        HBox hBox = new HBox(tickUnitLabel, tickUnitTextField, upperBoundLabel, upperBoundTextField, separator1,
+                fastBackward, backward, forward, fastForward, offsetLabel, plus, minus, pageLabel);
 
         hBox.getChildren().forEach(c -> c.setDisable(!canDisplay));
 
         hBox.setAlignment(Pos.CENTER);
         hBox.setSpacing(5);
-        hBox.setPadding(new Insets(0,0,5,0));
+        hBox.setPadding(new Insets(0, 0, 5, 0));
 
         pane.setBottom(hBox);
         //pane.getStylesheets().add("modena.css");
+
         stage.setTitle("Java Monitor");
         stage.setScene(new Scene(pane, 1280, 1024));
         stage.show();
@@ -189,6 +242,11 @@ public class Monitor extends Application {
         Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> saveStats()));
         saveTimeline.setCycleCount(Animation.INDEFINITE);
         saveTimeline.play();
+    }
+
+    private void showTabStats(int tabId) {
+        tickUnitTextField.setText(String.valueOf(config.getGui().getCharts().get(tabId).getTickUnit()));
+        upperBoundTextField.setText(String.valueOf(config.getGui().getCharts().get(tabId).getUpperBound()));
     }
 
     private void fillCharts() {
@@ -225,11 +283,11 @@ public class Monitor extends Application {
     }
 
     @SuppressWarnings("all")
-    private LineChart createLineChart(int lowerBound, int upperBound, int tickCount) {
+    private LineChart createLineChart(int lowerBound, int upperBound, int tickUnit) {
         CategoryAxis xAxis = new CategoryAxis();
         //xAxis.setLabel("Time");
 
-        NumberAxis yAxis = new NumberAxis(lowerBound, upperBound, tickCount);
+        NumberAxis yAxis = new NumberAxis(lowerBound, upperBound, tickUnit);
         //yAxis.setLabel("#");
         LineChart linechart = new LineChart(xAxis, yAxis);
 
@@ -291,7 +349,7 @@ public class Monitor extends Application {
     }
 
     @Override
-    public void stop(){
+    public void stop() {
         saveStats();
     }
 
