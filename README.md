@@ -201,7 +201,6 @@ Wishlist
 #### Other
 
 * build ZIP archive with all necessary files (see mdm-monitoring)
-* Logs everywhere
 * Log path of loaded config
 * chart ID as custom string. Test
 * Path to dumps (test remote too)

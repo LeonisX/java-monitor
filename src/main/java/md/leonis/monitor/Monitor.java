@@ -271,7 +271,7 @@ public class Monitor extends Application {
                     if (null == logField.getValue()) {
                         logField.setValue(val);
                     } else if (!logField.getValue().equals(val) && val != null) {
-                        System.out.println(task.getName() + ". " + logField.getName() + ": " + val);
+                        LOGGER.warn(String.format("%s::%s: %s -> %s", task.getName(), logField.getName(), logField.getValue(), val));
                         logField.setValue(val);
                     }
                 }
