@@ -19,10 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import md.leonis.monitor.config.Chart;
-import md.leonis.monitor.config.Config;
-import md.leonis.monitor.config.Field;
-import md.leonis.monitor.config.Task;
+import md.leonis.monitor.config.*;
 import md.leonis.monitor.model.LogField;
 import md.leonis.monitor.model.Metric;
 import md.leonis.monitor.model.Stats;
@@ -45,6 +42,9 @@ public class Monitor extends Application {
     private static final Log LOGGER = LogFactory.getLog(FileUtils.class);
 
     private static Config config = ConfigHolder.getInstance();
+    private static GuiConfig gui = config.getGui();
+    private static List<Chart> charts = gui.getCharts();
+    private static List<Task> tasks = config.getTasks();
 
     private static final String NO_TASKS = "No monitoring tasks. Please, setup config.yml file.";
 
@@ -59,8 +59,8 @@ public class Monitor extends Application {
 
     private List<LogField> logFieldsList = new ArrayList<>();
 
-    private double chartScale = config.getGui().getHorizontalScale();
-    private int chartPageSize = config.getGui().getPageSize();
+    private double chartScale = gui.getHorizontalScale();
+    private int chartPageSize = gui.getPageSize();
     private int chartOffset = 0;
 
     private TextField upperBoundTextField = new TextField();
@@ -75,13 +75,13 @@ public class Monitor extends Application {
     public void start(Stage stage) {
         LoggerUtils.disableApacheHttpLogs();
 
-        statsList = config.getTasks().stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
+        statsList = tasks.stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
 
         canDisplay = !statsList.isEmpty();
 
         // List of LineChart
-        for (int i = 0; i < config.getGui().getCharts().size(); i++) {
-            Chart chart = config.getGui().getCharts().get(i);
+        for (int i = 0; i < charts.size(); i++) {
+            Chart chart = charts.get(i);
             chartList.add(createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickUnit()));
             chartsByIdMap.put(chart.getId(), i);
         }
@@ -92,7 +92,7 @@ public class Monitor extends Application {
 
         // List of lists of Series data
         chartsDataList = chartList.stream().map(c -> new ArrayList<XYChart.Series<String, Long>>()).collect(Collectors.toList());
-        config.getTasks().forEach(task ->
+        tasks.forEach(task ->
                 task.getFields().forEach(field -> {
                     if (field.getChartId() != null) {
                         Integer chartId = chartsByIdMap.get(field.getChartId());
@@ -104,7 +104,7 @@ public class Monitor extends Application {
                 })
         );
 
-        fieldsByNameMap = config.getTasks().stream().flatMap(t -> t.getFields().stream()).collect(Collectors.toMap(Field::getName, f -> f));
+        fieldsByNameMap = tasks.stream().flatMap(t -> t.getFields().stream()).collect(Collectors.toMap(Field::getName, f -> f));
 
         chartFieldsByNameMap = fieldsByNameMap.entrySet().stream().filter(e -> e.getValue().getChartId() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -114,7 +114,7 @@ public class Monitor extends Application {
 
         TabPane tabPane = new TabPane();
         for (int i = 0; i < chartList.size(); i++) {
-            Tab tab = newTab(config.getGui().getCharts().get(i).getName(), chartList.get(i));
+            Tab tab = newTab(charts.get(i).getName(), chartList.get(i));
             tab.setId(String.valueOf(i));
             tabPane.getTabs().add(tab);
         }
@@ -159,7 +159,7 @@ public class Monitor extends Application {
         Button plus = new Button(" + ");
         plus.setOnAction(e -> {
             chartScale *= 2;
-            config.getGui().setHorizontalScale(chartScale);
+            gui.setHorizontalScale(chartScale);
             chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
@@ -167,7 +167,7 @@ public class Monitor extends Application {
         Button minus = new Button(" - ");
         minus.setOnAction(e -> {
             chartScale /= 2;
-            config.getGui().setHorizontalScale(chartScale);
+            gui.setHorizontalScale(chartScale);
             fillCharts();
         });
 
@@ -191,7 +191,7 @@ public class Monitor extends Application {
                 int newValue = Integer.parseInt(upperBoundTextField.getText());
                 int chartId = Integer.parseInt(tabPane.getSelectionModel().getSelectedItem().getId());
                 ((NumberAxis) chartList.get(chartId).getYAxis()).setUpperBound(newValue);
-                config.getGui().getCharts().get(chartId).setUpperBound(newValue);
+                charts.get(chartId).setUpperBound(newValue);
             }
         });
 
@@ -208,7 +208,7 @@ public class Monitor extends Application {
                 int newValue = Integer.parseInt(tickUnitTextField.getText());
                 int chartId = Integer.parseInt(tabPane.getSelectionModel().getSelectedItem().getId());
                 ((NumberAxis) chartList.get(chartId).getYAxis()).setTickUnit(newValue);
-                config.getGui().getCharts().get(chartId).setTickUnit(newValue);
+                charts.get(chartId).setTickUnit(newValue);
             }
         });
 
@@ -225,10 +225,14 @@ public class Monitor extends Application {
         //pane.getStylesheets().add("modena.css");
 
         stage.setTitle("Java Monitor");
-        stage.setScene(new Scene(pane, 1280, 1024));
+        stage.setScene(new Scene(pane, gui.getWindow().getWidth(), gui.getWindow().getHeight()));
+        stage.setWidth(gui.getWindow().getWidth());
+        stage.setHeight(gui.getWindow().getHeight());
+        stage.widthProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setWidth(newVal.intValue()));
+        stage.heightProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setHeight(newVal.intValue()));
         stage.show();
 
-        List<Timeline> timelineList = config.getTasks().stream().map(task -> {
+        List<Timeline> timelineList = tasks.stream().map(task -> {
             Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> getStats(task)));
             timeline.setCycleCount(Animation.INDEFINITE);
             timeline.setDelay(Duration.seconds(task.getTimeOffsetInSeconds()));
@@ -245,8 +249,8 @@ public class Monitor extends Application {
     }
 
     private void showTabStats(int tabId) {
-        tickUnitTextField.setText(String.valueOf(config.getGui().getCharts().get(tabId).getTickUnit()));
-        upperBoundTextField.setText(String.valueOf(config.getGui().getCharts().get(tabId).getUpperBound()));
+        tickUnitTextField.setText(String.valueOf(charts.get(tabId).getTickUnit()));
+        upperBoundTextField.setText(String.valueOf(charts.get(tabId).getUpperBound()));
     }
 
     private void fillCharts() {
@@ -327,7 +331,7 @@ public class Monitor extends Application {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Metric metric = new Metric(currentLocalDateTime, map);
-        statsList.get(config.getTasks().indexOf(task)).getMetrics().add(metric);
+        statsList.get(tasks.indexOf(task)).getMetrics().add(metric);
 
         logFieldsList.forEach(logField -> {
             if (fieldsByNameMap.get(logField.getName()).isLogAnyChange()) {
@@ -355,7 +359,7 @@ public class Monitor extends Application {
 
     private void saveStats() {
         for (int i = 0; i < statsList.size(); i++) {
-            FileUtils.saveStats(config.getTasks().get(i).getName(), statsList.get(i));
+            FileUtils.saveStats(tasks.get(i).getName(), statsList.get(i));
         }
 
         FileUtils.saveConfig(config);
