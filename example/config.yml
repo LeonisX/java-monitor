@@ -1,0 +1,125 @@
+requestIntervalInSeconds: 30
+saveStateIntervalInSeconds: 600
+
+gui:
+  window:
+    width: 900
+    height: 650
+
+  charts:
+    horizontalScale: 1.0
+    pageSize: 200
+
+    items:
+      - id: '0'
+        name: Wildfly
+        lowerBound: 0
+        upperBound: 200
+        tickUnit: 1
+      - id: '1'
+        name: MySQL
+        lowerBound: 0
+        upperBound: 210
+        tickUnit: 1
+      - id: '2'
+        name: Requests
+        lowerBound: 0
+        upperBound: 500
+        tickUnit: 10
+
+tasks:
+
+- name: DataSource
+  request: HTTP
+  url: http://localhost:9990/management/subsystem/datasources/data-source/testDS/statistics/pool?read-resource&include-runtime=true&recursive
+  authentication:
+    type: DIGEST
+    userName: userName
+    password: password
+    params:
+      host: localhost
+      port: 9990
+      realm: ManagementRealm
+  responseFormat: JSON
+  fields:
+  - name: ActiveCount
+    chartId: 0
+    logAnyChange: false
+  - name: AvailableCount
+    chartId: 0
+    logAnyChange: false
+  - name: BlockingFailureCount
+    logAnyChange: true
+  - name: IdleCount
+    chartId: 0
+    logAnyChange: false
+  - name: InUseCount
+    chartId: 0
+    logAnyChange: false
+  - name: MaxUsedCount
+    chartId: 0
+    logAnyChange: false
+  - name: MaxWaitCount
+    logAnyChange: true
+  - name: WaitCount
+    logAnyChange: true
+
+- name: MySql
+  request: JDBC
+  url: jdbc:mysql://localhost:3306/myDB?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+  authentication:
+    type: PASSWORD
+    userName: userName
+    password: password
+  responseFormat: CUSTOM
+  fields:
+  - name: Aborted_clients
+    chartId: 1
+    logAnyChange: false
+  - name: Aborted_connects
+    chartId: 1
+    logAnyChange: false
+  - name: Max_used_connections
+    chartId: 1
+    logAnyChange: false
+  - name: Threads_connected
+    chartId: 1
+    logAnyChange: false
+  - name: Threads_running
+    chartId: 1
+    logAnyChange: false
+  - name: Connection_errors_accept
+    logAnyChange: true
+  - name: Connection_errors_internal
+    logAnyChange: true
+  - name: Connection_errors_max_connections
+    logAnyChange: true
+  - name: Connection_errors_peer_address
+    logAnyChange: true
+  - name: Connection_errors_select
+    logAnyChange: true
+  - name: Connection_errors_tcpwrap
+    logAnyChange: true
+  - name: Delayed_errors
+    logAnyChange: true
+  - name: Locked_connects
+    logAnyChange: true
+  - name: Max_execution_time_exceeded
+    logAnyChange: true
+  - name: Max_execution_time_set
+    logAnyChange: true
+  - name: Max_execution_time_set_failed
+    logAnyChange: true
+
+- name: Request
+  request: HTTP
+  url: http://translate.google.com/?hl=ru#view=home&op=translate&sl=en&tl=ru&text=This%20is%20an%20example
+  authentication:
+    type: BASIC
+    userName: userName
+    password: password
+  responseFormat: STATUS_CODE_ONLY
+  fields:
+  - name: StatusCode
+    chartId: 2
+    logAnyChange: true

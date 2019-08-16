@@ -44,18 +44,53 @@ All settings are collected in the `config.yml` file. `YAML` allows us to conveni
 
 #### Interface Settings
 
-* `gui.horizontalScale` and `gui.pageSize` control the horizontal density of data display.
+* `window.width` and` window.height`: the width and height of the window, respectively.
+
+#### Charts Settings
+
+`charts`: setting up one or more line graphs.
+
+* `horizontalScale` and `pageSize` control the horizontal density of data display.
+These values are global for all line charts.
 Default values: `1` and `200`, respectively. Metrics display count: `horizontalScale * pageSize`. 
 At runtime `pageSize` value doesn't change runtime. Only `horizontalScale`.
 
-* `window.width` and` window.height`: the width and height of the window, respectively.
+* `items`: individual line chart settings. There may be several charts.
+   * `id`: chart identifier. Separate metrics will be attached to it. Example: `0`, `1`, `2`, ... String values are allowed.
+   * `name`: the name of the panel on which the chart will be displayed.
+   * `lowerBound`: the lower bound of the chart values. Default: `0`.
+   * `upperBound`: the upper bound of the chart values. Default: `200`.
+   * `tickUnit`: the frequency of the horizontal grid in the chart. Default: `1`.
 
-* `charts`: setting up one or more line charts.
-  * `id`: chart identifier. Separate metrics will be attached to it. Example: `0`,` 1`, `2`, ... String values are allowed.
-  * `name`: the name of the panel on which the chart will be displayed.
-  * `lowerBound`: the lower bound of the chart values. Default: `0`.
-  * `upperBound`: the upper bound of the chart values. Default `200`.
-  * `tickUnit`: the frequency of the horizontal grid in the chart. Default: `1`
+Example:
+
+```yaml
+gui:
+  window:
+    width: 900
+    height: 650
+
+  charts:
+    horizontalScale: 1.0
+    pageSize: 200
+
+    items:
+      - id: '0'
+        name: Wildfly
+        lowerBound: 0
+        upperBound: 200
+        tickUnit: 1
+      - id: '1'
+        name: MySQL
+        lowerBound: 0
+        upperBound: 210
+        tickUnit: 1
+      - id: '2'
+        name: Requests
+        lowerBound: 0
+        upperBound: 500
+        tickUnit: 10
+```
 
 #### Setup tasks
 

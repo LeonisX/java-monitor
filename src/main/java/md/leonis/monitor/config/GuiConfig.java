@@ -1,14 +1,10 @@
 package md.leonis.monitor.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class GuiConfig {
 
     private Window window = new Window();
-    private double horizontalScale = 1;
-    private int pageSize = 200;
-    private List<Chart> charts = new ArrayList<>();
+
+    private Charts charts = new Charts();
 
     public Window getWindow() {
         return window;
@@ -18,27 +14,11 @@ public class GuiConfig {
         this.window = window;
     }
 
-    public double getHorizontalScale() {
-        return horizontalScale;
-    }
-
-    public void setHorizontalScale(double horizontalScale) {
-        this.horizontalScale = horizontalScale;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public List<Chart> getCharts() {
+    public Charts getCharts() {
         return charts;
     }
 
-    public void setCharts(List<Chart> charts) {
+    public void setCharts(Charts charts) {
         this.charts = charts;
     }
 }

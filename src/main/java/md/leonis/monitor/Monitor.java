@@ -43,7 +43,7 @@ public class Monitor extends Application {
 
     private static Config config = ConfigHolder.getInstance();
     private static GuiConfig gui = config.getGui();
-    private static List<Chart> charts = gui.getCharts();
+    private static List<Chart> charts = gui.getCharts().getItems();
     private static List<Task> tasks = config.getTasks();
 
     private static final String NO_TASKS = "No monitoring tasks. Please, setup config.yml file.";
@@ -59,8 +59,8 @@ public class Monitor extends Application {
 
     private List<LogField> logFieldsList = new ArrayList<>();
 
-    private double chartScale = gui.getHorizontalScale();
-    private int chartPageSize = gui.getPageSize();
+    private double chartScale = gui.getCharts().getHorizontalScale();
+    private int chartPageSize = gui.getCharts().getPageSize();
     private int chartOffset = 0;
 
     private TextField upperBoundTextField = new TextField();
@@ -77,7 +77,7 @@ public class Monitor extends Application {
 
         statsList = tasks.stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
 
-        canDisplay = !statsList.isEmpty();
+        canDisplay = !statsList.isEmpty() && !charts.isEmpty();
 
         // List of LineChart
         for (int i = 0; i < charts.size(); i++) {
@@ -96,7 +96,9 @@ public class Monitor extends Application {
                 task.getFields().forEach(field -> {
                     if (field.getChartId() != null) {
                         Integer chartId = chartsByIdMap.get(field.getChartId());
-                        chartsDataList.get(chartId).add(new XYChart.Series<>(field.getName(), FXCollections.observableArrayList()));
+                        if (chartId != null) {
+                            chartsDataList.get(chartId).add(new XYChart.Series<>(field.getName(), FXCollections.observableArrayList()));
+                        }
                     }
                     if (field.isLogAnyChange()) {
                         logFieldsList.add(new LogField(field.getName(), null));
@@ -159,7 +161,7 @@ public class Monitor extends Application {
         Button plus = new Button(" + ");
         plus.setOnAction(e -> {
             chartScale *= 2;
-            gui.setHorizontalScale(chartScale);
+            gui.getCharts().setHorizontalScale(chartScale);
             chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
@@ -167,7 +169,7 @@ public class Monitor extends Application {
         Button minus = new Button(" - ");
         minus.setOnAction(e -> {
             chartScale /= 2;
-            gui.setHorizontalScale(chartScale);
+            gui.getCharts().setHorizontalScale(chartScale);
             fillCharts();
         });
 
@@ -249,8 +251,10 @@ public class Monitor extends Application {
     }
 
     private void showTabStats(int tabId) {
-        tickUnitTextField.setText(String.valueOf(charts.get(tabId).getTickUnit()));
-        upperBoundTextField.setText(String.valueOf(charts.get(tabId).getUpperBound()));
+        if (canDisplay) {
+            tickUnitTextField.setText(String.valueOf(charts.get(tabId).getTickUnit()));
+            upperBoundTextField.setText(String.valueOf(charts.get(tabId).getUpperBound()));
+        }
     }
 
     private void fillCharts() {
