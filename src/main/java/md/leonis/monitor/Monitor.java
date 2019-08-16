@@ -20,8 +20,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import md.leonis.monitor.config.*;
-import md.leonis.monitor.model.LogField;
-import md.leonis.monitor.model.Metric;
+import md.leonis.monitor.model.LogMetric;
+import md.leonis.monitor.model.MetricsWithDate;
 import md.leonis.monitor.model.Stats;
 import md.leonis.monitor.source.HttpSource;
 import md.leonis.monitor.source.JdbcSource;
@@ -52,12 +52,14 @@ public class Monitor extends Application {
     private List<LineChart> chartList = new ArrayList<>();
     private Map<String, Integer> chartsByIdMap = new HashMap<>();
 
-    private Map<String, Field> fieldsByNameMap = new HashMap<>();
-    private Map<String, Field> chartFieldsByNameMap = new HashMap<>(); // Only fields for charts
+    private Map<String, Metric> metricsByNameMap = new HashMap<>();
+    private Map<String, Metric> chartMetricsByNameMap = new HashMap<>(); // Only metrics for charts
 
     private List<List<XYChart.Series<String, Long>>> chartsDataList;
 
-    private List<LogField> logFieldsList = new ArrayList<>();
+    private Map<String, Integer> taskIdByMetricNameMap = new HashMap<>();
+
+    private List<LogMetric> logMetricsList = new ArrayList<>();
 
     private double chartScale = gui.getCharts().getHorizontalScale();
     private int chartPageSize = gui.getCharts().getPageSize();
@@ -68,6 +70,8 @@ public class Monitor extends Application {
 
     private Label offsetLabel = new Label();
     private Label pageLabel = new Label();
+
+    private static volatile LocalDateTime currentLocalDateTime;
 
     private boolean canDisplay;
 
@@ -93,22 +97,28 @@ public class Monitor extends Application {
         // List of lists of Series data
         chartsDataList = chartList.stream().map(c -> new ArrayList<XYChart.Series<String, Long>>()).collect(Collectors.toList());
         tasks.forEach(task ->
-                task.getFields().forEach(field -> {
-                    if (field.getChartId() != null) {
-                        Integer chartId = chartsByIdMap.get(field.getChartId());
+                task.getMetrics().forEach(metric -> {
+                    if (metric.getChartId() != null) {
+                        Integer chartId = chartsByIdMap.get(metric.getChartId());
                         if (chartId != null) {
-                            chartsDataList.get(chartId).add(new XYChart.Series<>(field.getName(), FXCollections.observableArrayList()));
+                            chartsDataList.get(chartId).add(new XYChart.Series<>(metric.getName(), FXCollections.observableArrayList()));
                         }
                     }
-                    if (field.isLogAnyChange()) {
-                        logFieldsList.add(new LogField(field.getName(), null));
+                    if (metric.isLogAnyChange()) {
+                        logMetricsList.add(new LogMetric(metric.getName(), null));
                     }
                 })
         );
 
-        fieldsByNameMap = tasks.stream().flatMap(t -> t.getFields().stream()).collect(Collectors.toMap(Field::getName, f -> f));
+        for (int i = 0; i < tasks.size(); i++) {
+            for (Metric metric : tasks.get(i).getMetrics()) {
+                taskIdByMetricNameMap.put(metric.getName(), i);
+            }
+        }
 
-        chartFieldsByNameMap = fieldsByNameMap.entrySet().stream().filter(e -> e.getValue().getChartId() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        metricsByNameMap = tasks.stream().flatMap(t -> t.getMetrics().stream()).collect(Collectors.toMap(Metric::getName, f -> f));
+
+        chartMetricsByNameMap = metricsByNameMap.entrySet().stream().filter(e -> e.getValue().getChartId() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         fillCharts();
 
@@ -234,6 +244,10 @@ public class Monitor extends Application {
         stage.heightProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setHeight(newVal.intValue()));
         stage.show();
 
+        Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> currentLocalDateTime = LocalDateTime.now()));
+        etalonTimeLine.setCycleCount(Animation.INDEFINITE);
+        etalonTimeLine.play();
+
         List<Timeline> timelineList = tasks.stream().map(task -> {
             Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> getStats(task)));
             timeline.setCycleCount(Animation.INDEFINITE);
@@ -260,9 +274,9 @@ public class Monitor extends Application {
     private void fillCharts() {
         if (canDisplay) {
             int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size());
-            List<List<Metric>> subLists = statsList.stream().map(stats -> {
+            List<List<MetricsWithDate>> subLists = statsList.stream().map(stats -> {
                 if (toIndex > stats.getMetrics().size()) {
-                    return new ArrayList<Metric>();
+                    return new ArrayList<MetricsWithDate>();
                 } else {
                     return stats.getMetrics().subList(chartOffset, toIndex);
                 }
@@ -271,9 +285,21 @@ public class Monitor extends Application {
             for (List<XYChart.Series<String, Long>> series : chartsDataList) {
                 for (XYChart.Series<String, Long> d : series) {
                     String name = d.getName();
+
+                    List<XYChart.Data<String, Long>> dataList = subLists.get(taskIdByMetricNameMap.get(name)).stream().map(s -> {
+                        Metric metric = chartMetricsByNameMap.get(name);
+                        Long value = s.getMetrics().get(name);
+                        if (metric.getIncrement() != null) {
+                            value += metric.getIncrement();
+                        }
+                        if (metric.getMultiplier() != null) {
+                            value = (long) (value * metric.getMultiplier());
+                        }
+                        return new XYChart.Data<>(s.toString(), value);
+                    }).collect(Collectors.toList());
+
                     d.getData().clear();
-                    Integer chartId = chartsByIdMap.get(chartFieldsByNameMap.get(name).getChartId());
-                    d.getData().addAll(subLists.get(chartId).stream().map(s -> new XYChart.Data<>(s.toString(), s.getMetrics().get(name))).collect(Collectors.toList()));
+                    d.getData().addAll(dataList);
                 }
             }
 
@@ -317,7 +343,6 @@ public class Monitor extends Application {
     }
 
     private void getStats(Task task) {
-        LocalDateTime currentLocalDateTime = LocalDateTime.now();
         boolean isLast = chartOffset + (int) (chartPageSize * chartScale) >= statsList.get(0).getMetrics().size();
 
         Map<String, Long> map = null;
@@ -331,20 +356,20 @@ public class Monitor extends Application {
                 break;
         }
 
-        map = map.entrySet().stream().filter(e -> fieldsByNameMap.containsKey(e.getKey()))
+        map = map.entrySet().stream().filter(e -> metricsByNameMap.containsKey(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        Metric metric = new Metric(currentLocalDateTime, map);
-        statsList.get(tasks.indexOf(task)).getMetrics().add(metric);
+        MetricsWithDate metricsWithDate = new MetricsWithDate(currentLocalDateTime, map);
+        statsList.get(tasks.indexOf(task)).getMetrics().add(metricsWithDate);
 
-        logFieldsList.forEach(logField -> {
-            if (fieldsByNameMap.get(logField.getName()).isLogAnyChange()) {
-                Long val = metric.getMetrics().get(logField.getName());
-                if (null == logField.getValue()) {
-                    logField.setValue(val);
-                } else if (!logField.getValue().equals(val) && val != null) {
-                    LOGGER.warn(String.format("%s::%s: %s -> %s", task.getName(), logField.getName(), logField.getValue(), val));
-                    logField.setValue(val);
+        logMetricsList.forEach(logMetric -> {
+            if (metricsByNameMap.get(logMetric.getName()).isLogAnyChange()) {
+                Long val = metricsWithDate.getMetrics().get(logMetric.getName());
+                if (null == logMetric.getValue()) {
+                    logMetric.setValue(val);
+                } else if (!logMetric.getValue().equals(val) && val != null) {
+                    LOGGER.warn(String.format("%s::%s: %s -> %s", task.getName(), logMetric.getName(), logMetric.getValue(), val));
+                    logMetric.setValue(val);
                 }
             }
         });

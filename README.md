@@ -119,7 +119,7 @@ tasks:
         port: 9990
         realm: ManagementRealm
     responseFormat: JSON
-    fields:
+    metrics:
       - name: ActiveCount
         chartId: 0
         logAnyChange: false
@@ -129,7 +129,7 @@ tasks:
 
 This task gets metrics from `WildFly`. There are a lot of them, at the bottom there are several links to sources.
  
-The values of the `ActiveCount` field will be visible on the` chart-0`, but the values of the `BlockingFailureCount` field will not.
+The values of the `ActiveCount` metric will be visible on the` chart-0`, but the values of the `BlockingFailureCount` metric will not.
 But with any change in the console, a message will be displayed. This is very convenient when there is some little changeable data,
 and there is no desire to clutter up the charts.
 
@@ -162,7 +162,7 @@ Everything is simple here, we just need to add that the metrics are obtained by 
       userName: 'userName'
       password: 'password'
     responseFormat: CUSTOM
-    fields:
+    metrics:
       - name: Aborted_clients
         chartId: 1
         logAnyChange: false
@@ -181,7 +181,7 @@ The server line of life will be displayed on `chart-2`.
 
 In case of any crash, messages will also be displayed in the console.
 
-Note the name of the field `Request_StatusCode`. This is the `task name` + `"_StatusCode"`.
+Note the name of the metric `Request_StatusCode`. This is the `task name` + `"_StatusCode"`.
 If called incorrectly, there will be errors. These difficulties are associated with the features of the `Map` collection.
 
 ```yaml
@@ -195,11 +195,23 @@ If called incorrectly, there will be errors. These difficulties are associated w
       userName: 'userName'
       password: 'password'
     responseFormat: STATUS_CODE_ONLY
-    fields:
+    metrics:
       - name: Request_StatusCode
         chartId: 2
         logAnyChange: true
+        increment: -2
+        multiplier: 1
 ```
+
+Let's look at the properties of the `metric` object.
+
+* `name`: one of the names of the metrics. Must strictly match the existing metric returned by the server or database.
+* `chartId`: ID of the chart on which this metric will be displayed.
+* `logAnyChange`: if `true`, then any change to this metric will be reflected in the logs. Default: `false`.
+* `increment`: add (or subtract) an arbitrary value from the metric.
+It is very convenient, for example, if we collect HTTP statuses from several sites, and the data on the chart closes each other.
+Default: `0`.
+* `multiplier`: multiply the metric value by a specific real number. Default: `0.0`.
 
 Using
 -----
@@ -235,7 +247,6 @@ Used technologies
 
 Wishlist
 --------
-
 
 * Path to dumps (test remote too)
 * Autorun. Manual Play/Stop

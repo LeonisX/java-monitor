@@ -10,7 +10,7 @@ public class Task {
     private String url;
     private Authentication authentication;
     private ResponseFormat responseFormat;
-    private List<Field> fields;
+    private List<Metric> metrics;
 
     public String getName() {
         return name;
@@ -60,11 +60,11 @@ public class Task {
         this.responseFormat = responseFormat;
     }
 
-    public List<Field> getFields() {
-        return fields;
+    public List<Metric> getMetrics() {
+        return metrics;
     }
 
-    public void setFields(List<Field> fields) {
-        this.fields = fields;
+    public void setMetrics(List<Metric> metrics) {
+        this.metrics = metrics;
     }
 }

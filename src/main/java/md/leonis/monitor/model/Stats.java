@@ -6,13 +6,13 @@ import java.util.List;
 
 public class Stats implements Serializable {
 
-    private List<Metric> metrics = new ArrayList<>();
+    private List<MetricsWithDate> metrics = new ArrayList<>();
 
-    public List<Metric> getMetrics() {
+    public List<MetricsWithDate> getMetrics() {
         return metrics;
     }
 
-    public void setMetrics(List<Metric> metrics) {
+    public void setMetrics(List<MetricsWithDate> metrics) {
         this.metrics = metrics;
     }
 }

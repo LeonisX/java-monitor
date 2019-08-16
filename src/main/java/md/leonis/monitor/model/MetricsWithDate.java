@@ -5,14 +5,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-public class Metric implements Serializable {
+public class MetricsWithDate implements Serializable {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private LocalDateTime localDateTime;
     private Map<String, Long> metrics;
 
-    public Metric(LocalDateTime localDateTime, Map<String, Long> metrics) {
+    public MetricsWithDate(LocalDateTime localDateTime, Map<String, Long> metrics) {
         this.localDateTime = localDateTime;
         this.metrics = metrics;
     }

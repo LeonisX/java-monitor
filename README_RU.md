@@ -119,7 +119,7 @@ tasks:
         port: 9990
         realm: ManagementRealm
     responseFormat: JSON
-    fields:
+    metrics:
       - name: ActiveCount
         chartId: 0
         logAnyChange: false
@@ -162,7 +162,7 @@ tasks:
       userName: 'userName'
       password: 'password'
     responseFormat: CUSTOM
-    fields:
+    metrics:
       - name: Aborted_clients
         chartId: 1
         logAnyChange: false
@@ -195,11 +195,23 @@ tasks:
       userName: 'userName'
       password: 'password'
     responseFormat: STATUS_CODE_ONLY
-    fields:
+    metrics:
       - name: Request_StatusCode
         chartId: 2
         logAnyChange: true
+        increment: -2
+        multiplier: 1
 ```
+
+Давайте рассмотрим свойства объекта `metric`. 
+
+* `name`: одно из названий метрик. Должно строго соответствовать существующей метрике, возвращаемой сервером или базой данных.
+* `chartId`: ID графика, на котором будет отображаться данная метрика.
+* `logAnyChange`: если `true`, то любое изменение этой метрики будет отражено в логах. По умолчанию: `false`.
+* `increment`: прибавить (или отнять) произвольное значение из метрики. 
+Очень удобно, например, если собираем HTTP-статусы с нескольких сайтов, и данные на графике закрывают друг друга.
+По умолчанию: `0`.
+* `multiplier`: умножить значение метрики на определённое вещественное число. По умолчанию: `0.0`.
 
 Использование
 -------------

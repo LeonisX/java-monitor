@@ -1,11 +1,11 @@
 package md.leonis.monitor.model;
 
-public class LogField {
+public class LogMetric {
 
     private String name;
     private Long value;
 
-    public LogField(String name, Long value) {
+    public LogMetric(String name, Long value) {
         this.name = name;
         this.value = value;
     }
