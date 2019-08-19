@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="svg815"
+   width="128"
+   height="128"
+   viewBox="0 0 128 128"
+   sodipodi:docname="icon.svg"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <metadata
+     id="metadata821">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs819" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     id="namedview817"
+     showgrid="false"
+     inkscape:zoom="6.6733202"
+     inkscape:cx="127.39334"
+     inkscape:cy="59.749229"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg815" />
+  <g
+     id="g4596"
+     transform="translate(0.59940176,-0.44955132)">
+    <rect
+       inkscape:export-ydpi="12.108695"
+       inkscape:export-xdpi="12.108695"
+       inkscape:export-filename="C:\Users\user\icon16x16.png"
+       y="1.1490021"
+       x="0.00020933151"
+       height="126.851"
+       width="126.851"
+       id="rect863-4"
+       style="fill:none;fill-opacity:1;stroke:none;stroke-width:5.42163086;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+    <rect
+       inkscape:export-ydpi="12.108695"
+       inkscape:export-xdpi="12.108695"
+       inkscape:export-filename="C:\Users\user\icon16x16.png"
+       y="12.826218"
+       x="2.4207873"
+       height="105.17379"
+       width="122.00953"
+       id="rect863"
+       style="fill:#fcffff;fill-opacity:1;stroke:#000000;stroke-width:4.84157467;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="12.108695"
+       inkscape:export-xdpi="12.108695"
+       inkscape:export-filename="C:\Users\user\icon16x16.png"
+       sodipodi:nodetypes="ccccccccccc"
+       inkscape:connector-curvature="0"
+       id="path869"
+       d="m 3.7893279,66.059037 c 19.2932401,0 19.9301101,0 19.9301101,0 l 10.1149,-10.264755 7.87624,20.501137 12.79936,-51.444151 5.19931,76.865742 15.40889,-45.380529 10.27917,20.055809 5.30372,-10.427461 16.784812,0.14232 v 0"
+       style="fill:none;stroke:#000000;stroke-width:5.15905523;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <ellipse
+       inkscape:export-ydpi="12.108695"
+       inkscape:export-xdpi="12.108695"
+       inkscape:export-filename="C:\Users\user\icon16x16.png"
+       ry="2.9507773"
+       rx="2.8744884"
+       cy="65.595039"
+       cx="108.81013"
+       id="path871"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:5.65502357;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+</svg>

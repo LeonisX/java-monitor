@@ -258,7 +258,16 @@ public class Monitor extends Application {
         stage.setMaximized(gui.getWindow().isMaximized());
         stage.maximizedProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setMaximized(newVal));
 
-        stage.getIcons().add(new Image(FileUtils.getResourceAsStream("icon.png", isDebug)));
+        stage.getIcons().addAll(
+                new Image(FileUtils.getResourceAsStream("icon256x256.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon128x128.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon96x96.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon64x64.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon48x48.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon32x32.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon24x24.png", isDebug)),
+                new Image(FileUtils.getResourceAsStream("icon16x16.png", isDebug))
+        );
         stage.show();
 
         Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> currentLocalDateTime = LocalDateTime.now()));
