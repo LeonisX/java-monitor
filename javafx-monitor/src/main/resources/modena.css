@@ -2745,7 +2745,7 @@ is being used to size a border should also be in pixels.
 }
 .chart-series-line {
     -fx-stroke: CHART_COLOR_1;
-    -fx-stroke-width: 3px;
+    -fx-stroke-width: 2px;
 }
 .default-color0.chart-line-symbol { -fx-background-color: CHART_COLOR_1, white; }
 .default-color1.chart-line-symbol { -fx-background-color: CHART_COLOR_2, white; }

@@ -17,19 +17,19 @@
     </fileSets>
     <files>
         <file>
-            <source>./example/config.yml</source>
+            <source>../example/config.yml</source>
             <fileMode>0644</fileMode>
         </file>
         <file>
-            <source>./example/launcher.bat</source>
+            <source>../example/javafx-monitor.bat</source>
             <fileMode>0644</fileMode>
         </file>
         <file>
-            <source>README.md</source>
+            <source>../README.md</source>
             <fileMode>0644</fileMode>
         </file>
         <file>
-            <source>README_RU.md</source>
+            <source>../README_RU.md</source>
             <fileMode>0644</fileMode>
         </file>
     </files>

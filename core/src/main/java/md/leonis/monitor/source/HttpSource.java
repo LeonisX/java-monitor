@@ -14,6 +14,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,11 +27,14 @@ import java.util.stream.Collectors;
 
 public class HttpSource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSource.class);
+
     private static final String STATUS_CODE = "StatusCode";
 
     private static int retryCount = 0;
 
     public static Map<String, Long> executeTask(Task task) {
+        LOGGER.debug("Run task: {}", task.getName());
         Authentication auth = task.getAuthentication();
 
         CredentialsProvider provider = null;

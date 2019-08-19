@@ -2,6 +2,8 @@ package md.leonis.monitor.source;
 
 import md.leonis.monitor.FileUtils;
 import md.leonis.monitor.config.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -9,7 +11,11 @@ import java.util.Map;
 
 public class JdbcSource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcSource.class);
+
     public static Map<String, Long> executeTask(Task task) {
+        LOGGER.debug("Run task: {}", task.getName());
+
         Map<String, String> safeMap = new HashMap<>();
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");

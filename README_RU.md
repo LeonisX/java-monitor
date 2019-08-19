@@ -8,6 +8,7 @@ Universal Monitoring Tool
 * Гибкая настройка ресурсов и метрик в YAML-файле.
 * Поддержка BASIC и DIGEST Authentication.
 * UI на основе Java FX для просмотра статистики в виде линейных графиков.
+* Консольный вариант
 
 ![Java Universal Monitor](example/monitor.png "Java Universal Monitor")
 
@@ -28,10 +29,21 @@ Universal Monitoring Tool
 Установка и настройка
 ---------------------
 
-* Скомпилировать проект: `mvn clean package`
-* Распаковать архив `java-monitor-%.%.zip` в каталоге `./target`.
+* Скомпилировать родительский проект: `mvn clean install`
+
+### Консольная версия
+
+Выполняет задачи и сохраняет результаты выполнения без вывода на экран.
+
+* Распаковать архив `console-monitor-%.%.zip` в каталоге `./console-monitor/target`.
 * **Настроить** `config.yml`
-* Запустить `launcher.bat`, или вручную: `java -jar java-monitor.jar`.
+* Запустить `console-monitor.bat`, или вручную: `java -jar console-monitor.jar`.
+
+### Оконная версия
+
+* Распаковать архив `javafx-monitor-%.%.zip` в каталоге `./javafx-monitor/target`.
+* **Настроить** `config.yml`
+* Запустить `javafx-monitor.bat`, или вручную: `java -jar javafx-monitor.jar`.
 
 ### Файл настроек
 
@@ -44,12 +56,16 @@ Universal Monitoring Tool
 
 #### Настройки интерфейса
 
+*Эти настройки актуальны только для оконной версии.*
+
 * `window.width` и `window.height`: ширина и высота окна соответственно.
 * `window.maximized`: состояние окна: распахнутое или нет. По умолчанию `false`.
 
 #### Настройка графиков
 
 `charts`: настройка одного или нескольких линейных графиков.
+
+*Эти настройки актуальны только для оконной версии.*
 
 * `horizontalScale` и `pageSize` регулируют плотность отображения данных по горизонтали. 
 Эти значения глобальны для всех линейных графиков.

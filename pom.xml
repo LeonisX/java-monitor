@@ -6,12 +6,14 @@
 
     <groupId>md.leonis</groupId>
     <artifactId>java-monitor</artifactId>
-    <version>1.1</version>
+    <packaging>pom</packaging>
+    <version>1.2</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version>1.2</version>
         <slf4j.version>2.0.0-alpha0</slf4j.version>
     </properties>
 
@@ -82,50 +84,9 @@
         </repository>
     </repositories>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>jar-with-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>${project.artifactId}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>md.leonis.monitor.Monitor</mainClass>
-                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>assemble-all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-        <finalName>${project.artifactId}-${project.version}</finalName> <!--default-->
-    </build>
-
+    <modules>
+        <module>javafx-monitor</module>
+        <module>console-monitor</module>
+        <module>core</module>
+    </modules>
 </project>

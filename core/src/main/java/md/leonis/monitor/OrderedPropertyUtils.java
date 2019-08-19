@@ -1,5 +1,9 @@
 package md.leonis.monitor;
 
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.introspector.*;
+import org.yaml.snakeyaml.util.PlatformFeatureDetector;
+
 import java.beans.FeatureDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -8,10 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-
-import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.introspector.*;
-import org.yaml.snakeyaml.util.PlatformFeatureDetector;
 
 public class OrderedPropertyUtils extends PropertyUtils {
 

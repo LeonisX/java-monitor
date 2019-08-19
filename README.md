@@ -8,6 +8,7 @@ A utility for monitoring network resources such as databases, servlet containers
 * Flexible configuration of resources and metrics in the YAML file.
 * Support for BASIC and DIGEST Authentication.
 * Java FX based UI for viewing statistics in line charts.
+* Console version
 
 ![Java Universal Monitor](example/monitor.png "Java Universal Monitor")
 
@@ -28,10 +29,19 @@ I really hope that it is useful to someone else.
 Installation and setup
 ---------------------
 
-* Compile project: `mvn clean package`
-* Unzip archive `java-monitor-%.%.zip` in the `./target` directory.
+### Console version
+
+Performs tasks and saves execution results without displaying on the screen.
+
+* Unzip archive `console-monitor-%.%.zip` in the `./console-monitor/target` directory.
 * **Configure** `config.yml`
-* Run `launcher.bat`, or manually: `java -jar java-monitor.jar`.
+* Run `console-monitor.bat`, or manually: `java -jar console-monitor.jar`.
+
+### UI version
+
+* Unzip archive `javafx-monitor-%.%.zip` in the `./javafx-monitor/target` directory.
+* **Configure** `config.yml`
+* Run `javafx-monitor.bat`, or manually: `java -jar javafx-monitor.jar`.
 
 ### Settings File
 
@@ -44,12 +54,16 @@ All settings are collected in the `config.yml` file. `YAML` allows us to conveni
 
 #### Interface Settings
 
+*These settings are relevant only for the window version.*
+
 * `window.width` and` window.height`: the width and height of the window, respectively.
 * `window.maximized`: state of the window: maximized or not. The default is `false`.
 
 #### Charts Settings
 
 `charts`: setting up one or more line graphs.
+
+*These settings are relevant only for the window version.*
 
 * `horizontalScale` and `pageSize` control the horizontal density of data display.
 These values are global for all line charts.
@@ -249,10 +263,8 @@ Used technologies
 Wishlist
 --------
 
-* Non-transparent icon
 * Path to dumps (test remote too)
 * Autorun. Manual Play/Stop
-* Console-only version
 
 Where to read about metrics
 ---------------------------

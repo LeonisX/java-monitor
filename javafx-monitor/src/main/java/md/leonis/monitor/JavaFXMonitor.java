@@ -21,46 +21,30 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import md.leonis.monitor.config.*;
-import md.leonis.monitor.model.LogMetric;
 import md.leonis.monitor.model.MetricsWithDate;
-import md.leonis.monitor.model.Stats;
-import md.leonis.monitor.source.HttpSource;
-import md.leonis.monitor.source.JdbcSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public class Monitor extends Application {
+public class JavaFXMonitor extends Application {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Monitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaFXMonitor.class);
 
     private static Config config = ConfigHolder.getInstance();
     private static GuiConfig gui = config.getGui();
     private static List<Chart> charts = gui.getCharts().getItems();
     private static List<Task> tasks = config.getTasks();
 
-    private static final String NO_TASKS = "No monitoring tasks. Please, setup config.yml file.";
+    private MonitorCore core;
 
-    private List<Stats> statsList;
     private List<LineChart> chartList = new ArrayList<>();
-    private Map<String, Integer> chartsByIdMap = new HashMap<>();
-
-    private Map<String, Metric> metricsByNameMap = new HashMap<>();
-    private Map<String, Metric> chartMetricsByNameMap = new HashMap<>(); // Only metrics for charts
-
     private List<List<XYChart.Series<String, Long>>> chartsDataList;
-
-    private Map<String, Integer> taskIdByMetricNameMap = new HashMap<>();
-
-    private List<LogMetric> logMetricsList = new ArrayList<>();
 
     private double chartScale = gui.getCharts().getHorizontalScale();
     private int chartPageSize = gui.getCharts().getPageSize();
@@ -72,29 +56,21 @@ public class Monitor extends Application {
     private Label offsetLabel = new Label();
     private Label pageLabel = new Label();
 
-    private static volatile LocalDateTime currentLocalDateTime;
-
     private boolean canDisplay;
 
     @Override
-    public void start(Stage stage) {
-        String version = Monitor.class.getPackage().getImplementationVersion();
-        boolean isDebug = (version == null);
-        LOGGER.info(String.format("Java Monitor %s starts...%n", isDebug ? "Dev" : version));
+    public void init() {
+        core = new MonitorCore();
 
-        statsList = tasks.stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
-
-        canDisplay = !statsList.isEmpty() && !charts.isEmpty();
+        canDisplay = !tasks.isEmpty() && !charts.isEmpty();
 
         // List of LineChart
-        for (int i = 0; i < charts.size(); i++) {
-            Chart chart = charts.get(i);
+        for (Chart chart : charts) {
             chartList.add(createLineChart(chart.getLowerBound(), chart.getUpperBound(), chart.getTickUnit()));
-            chartsByIdMap.put(chart.getId(), i);
         }
 
         if (canDisplay) {
-            chartOffset = Math.max(0, statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+            chartOffset = Math.max(0, core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
         }
 
         // List of lists of Series data
@@ -102,26 +78,20 @@ public class Monitor extends Application {
         tasks.forEach(task ->
                 task.getMetrics().forEach(metric -> {
                     if (metric.getChartId() != null) {
-                        Integer chartId = chartsByIdMap.get(metric.getChartId());
+                        Integer chartId = core.getChartsByIdMap().get(metric.getChartId());
                         if (chartId != null) {
                             chartsDataList.get(chartId).add(new XYChart.Series<>(metric.getName(), FXCollections.observableArrayList()));
                         }
                     }
-                    if (metric.isLogAnyChange()) {
-                        logMetricsList.add(new LogMetric(metric.getName(), null));
-                    }
                 })
         );
+    }
 
-        for (int i = 0; i < tasks.size(); i++) {
-            for (Metric metric : tasks.get(i).getMetrics()) {
-                taskIdByMetricNameMap.put(metric.getName(), i);
-            }
-        }
-
-        metricsByNameMap = tasks.stream().flatMap(t -> t.getMetrics().stream()).collect(Collectors.toMap(Metric::getName, f -> f));
-
-        chartMetricsByNameMap = metricsByNameMap.entrySet().stream().filter(e -> e.getValue().getChartId() != null).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    @Override
+    public void start(Stage stage) {
+        String version = JavaFXMonitor.class.getPackage().getImplementationVersion();
+        boolean isDebug = (version == null);
+        LOGGER.info(String.format("JavaFX Monitor %s starts...%n", isDebug ? "Dev" : version));
 
         fillCharts();
 
@@ -144,8 +114,7 @@ public class Monitor extends Application {
         if (canDisplay) {
             pane.setCenter(tabPane);
         } else {
-            LOGGER.warn(NO_TASKS);
-            pane.setCenter(new Label(NO_TASKS));
+            pane.setCenter(new Label(MonitorCore.NO_TASKS));
         }
 
         Button fastBackward = new Button(" <<< ");
@@ -161,13 +130,13 @@ public class Monitor extends Application {
         });
         Button fastForward = new Button(" >>> ");
         fastForward.setOnAction(e -> {
-            chartOffset = statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale);
+            chartOffset = core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
         Button forward = new Button(" >> ");
         forward.setOnAction(e -> {
-            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
@@ -175,7 +144,7 @@ public class Monitor extends Application {
         plus.setOnAction(e -> {
             chartScale *= 2;
             gui.getCharts().setHorizontalScale(chartScale);
-            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
+            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), core.getStatsList().get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
@@ -210,8 +179,8 @@ public class Monitor extends Application {
             }
         });
 
-        Label separator1 = new Label();
-        separator1.setPadding(new Insets(0, 0, 0, 30));
+        Label separator = new Label();
+        separator.setPadding(new Insets(0, 0, 0, 30));
 
         Label tickUnitLabel = new Label("Chart Tick Unit:");
 
@@ -227,7 +196,7 @@ public class Monitor extends Application {
             }
         });
 
-        HBox hBox = new HBox(tickUnitLabel, tickUnitTextField, upperBoundLabel, upperBoundTextField, separator1,
+        HBox hBox = new HBox(tickUnitLabel, tickUnitTextField, upperBoundLabel, upperBoundTextField, separator,
                 fastBackward, backward, forward, fastForward, offsetLabel, plus, minus, pageLabel);
 
         hBox.getChildren().forEach(c -> c.setDisable(!canDisplay));
@@ -237,7 +206,7 @@ public class Monitor extends Application {
         hBox.setPadding(new Insets(0, 0, 5, 0));
 
         pane.setBottom(hBox);
-        //pane.getStylesheets().add("modena.css");
+        pane.getStylesheets().add("modena.css");
 
         stage.setTitle("Java Monitor");
         stage.setScene(new Scene(pane, gui.getWindow().getWidth(), gui.getWindow().getHeight()));
@@ -257,35 +226,17 @@ public class Monitor extends Application {
         stage.maximizedProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setMaximized(newVal));
 
         stage.getIcons().addAll(
-                new Image(FileUtils.getResourceAsStream("icon256x256.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon128x128.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon96x96.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon64x64.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon48x48.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon32x32.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon24x24.png", isDebug)),
-                new Image(FileUtils.getResourceAsStream("icon16x16.png", isDebug))
+                new Image(FileUtils.getResourceAsStream("icon256x256.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon128x128.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon96x96.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon64x64.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon48x48.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon32x32.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon24x24.png", isDebug, this)),
+                new Image(FileUtils.getResourceAsStream("icon16x16.png", isDebug, this))
         );
         stage.show();
-
-        Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> currentLocalDateTime = LocalDateTime.now()));
-        etalonTimeLine.setCycleCount(Animation.INDEFINITE);
-        etalonTimeLine.play();
-
-        List<Timeline> timelineList = tasks.stream().map(task -> {
-            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> getStats(task)));
-            timeline.setCycleCount(Animation.INDEFINITE);
-            timeline.setDelay(Duration.seconds(task.getTimeOffsetInSeconds()));
-            return timeline;
-        }).collect(Collectors.toList());
-
-        ParallelTransition pt = new ParallelTransition();
-        pt.getChildren().addAll(timelineList);
-        pt.play();
-
-        Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> saveStats()));
-        saveTimeline.setCycleCount(Animation.INDEFINITE);
-        saveTimeline.play();
+        start();
     }
 
     private void showTabStats(int tabId) {
@@ -297,8 +248,8 @@ public class Monitor extends Application {
 
     private void fillCharts() {
         if (canDisplay) {
-            int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), statsList.get(0).getMetrics().size());
-            List<List<MetricsWithDate>> subLists = statsList.stream().map(stats -> {
+            int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), core.getStatsList().get(0).getMetrics().size());
+            List<List<MetricsWithDate>> subLists = core.getStatsList().stream().map(stats -> {
                 if (toIndex > stats.getMetrics().size()) {
                     return new ArrayList<MetricsWithDate>();
                 } else {
@@ -310,8 +261,8 @@ public class Monitor extends Application {
                 for (XYChart.Series<String, Long> d : series) {
                     String name = d.getName();
 
-                    List<XYChart.Data<String, Long>> dataList = subLists.get(taskIdByMetricNameMap.get(name)).stream().map(s -> {
-                        Metric metric = chartMetricsByNameMap.get(name);
+                    List<XYChart.Data<String, Long>> dataList = subLists.get(core.getTaskIdByMetricNameMap().get(name)).stream().map(s -> {
+                        Metric metric = core.getChartMetricsByNameMap().get(name);
                         Long value = s.getMetrics().get(name);
                         if (metric.getIncrement() != null) {
                             value += metric.getIncrement();
@@ -327,8 +278,9 @@ public class Monitor extends Application {
                 }
             }
 
-            offsetLabel.setText(String.format("[%s - %s] of %s", chartOffset, toIndex, statsList.get(0).getMetrics().size()));
+            offsetLabel.setText(String.format("[%s - %s] of %s", chartOffset, toIndex, core.getStatsList().get(0).getMetrics().size()));
             pageLabel.setText(String.format("Page size: %s", (int) (chartPageSize * chartScale)));
+
         }
     }
 
@@ -366,40 +318,34 @@ public class Monitor extends Application {
         }
     }
 
+    private void start() {
+        Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> core.setCurrentLocalDateTime(LocalDateTime.now())));
+        etalonTimeLine.setCycleCount(Animation.INDEFINITE);
+        etalonTimeLine.play();
+
+        List<Timeline> timelineList = tasks.stream().map(task -> {
+            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> getStats(task)));
+            timeline.setCycleCount(Animation.INDEFINITE);
+            timeline.setDelay(Duration.seconds(task.getTimeOffsetInSeconds()));
+            return timeline;
+        }).collect(Collectors.toList());
+
+        ParallelTransition pt = new ParallelTransition();
+        pt.getChildren().addAll(timelineList);
+        pt.play();
+
+        Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> core.saveStats()));
+        saveTimeline.setCycleCount(Animation.INDEFINITE);
+        saveTimeline.play();
+    }
+
     private void getStats(Task task) {
-        boolean isLast = chartOffset + (int) (chartPageSize * chartScale) >= statsList.get(0).getMetrics().size();
+        boolean isLast = chartOffset + (int) (chartPageSize * chartScale) >= core.getStatsList().get(0).getMetrics().size();
 
-        Map<String, Long> map = null;
-        switch (task.getRequest()) {
-            case HTTP:
-                map = HttpSource.executeTask(task);
-                break;
-
-            case JDBC:
-                map = JdbcSource.executeTask(task);
-                break;
-        }
-
-        map = map.entrySet().stream().filter(e -> metricsByNameMap.containsKey(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        MetricsWithDate metricsWithDate = new MetricsWithDate(currentLocalDateTime, map);
-        statsList.get(tasks.indexOf(task)).getMetrics().add(metricsWithDate);
-
-        logMetricsList.forEach(logMetric -> {
-            if (metricsByNameMap.get(logMetric.getName()).isLogAnyChange()) {
-                Long val = metricsWithDate.getMetrics().get(logMetric.getName());
-                if (null == logMetric.getValue()) {
-                    logMetric.setValue(val);
-                } else if (!logMetric.getValue().equals(val) && val != null) {
-                    LOGGER.warn(String.format("%s::%s: %s -> %s", task.getName(), logMetric.getName(), logMetric.getValue(), val));
-                    logMetric.setValue(val);
-                }
-            }
-        });
+        core.getStats(task);
 
         if (isLast) {
-            chartOffset = Math.max(0, statsList.get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+            chartOffset = Math.max(0, core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
         }
 
         fillCharts();
@@ -407,15 +353,6 @@ public class Monitor extends Application {
 
     @Override
     public void stop() {
-        saveStats();
-    }
-
-    private void saveStats() {
-        for (int i = 0; i < statsList.size(); i++) {
-            FileUtils.saveStats(tasks.get(i).getName(), statsList.get(i));
-        }
-
-        FileUtils.saveConfig(config);
-        LOGGER.info("Stats and config saved.");
+        core.saveStats();
     }
 }

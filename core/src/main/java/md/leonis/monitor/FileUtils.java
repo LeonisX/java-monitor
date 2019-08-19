@@ -117,4 +117,16 @@ public class FileUtils {
             return new BufferedInputStream(FileUtils.class.getClassLoader().getResourceAsStream(path));
         }
     }
+
+    static InputStream getResourceAsStream(String path, boolean isDebug, Object monitor) {
+        if (isDebug) {
+            try {
+                return new BufferedInputStream(new FileInputStream(monitor.getClass().getProtectionDomain().getCodeSource().getLocation().getPath() + path));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return new BufferedInputStream(monitor.getClass().getClassLoader().getResourceAsStream(path));
+        }
+    }
 }
