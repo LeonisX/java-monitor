@@ -14,6 +14,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -78,6 +79,10 @@ public class Monitor extends Application {
     @Override
     public void start(Stage stage) {
         LoggerUtils.disableApacheHttpLogs();
+
+        String version = Monitor.class.getPackage().getImplementationVersion();
+        boolean isDebug = (version == null);
+        LOGGER.info(String.format("Java Monitor %s starts...%n", isDebug ? "Dev" : version));
 
         statsList = tasks.stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
 
@@ -242,6 +247,8 @@ public class Monitor extends Application {
         stage.setHeight(gui.getWindow().getHeight());
         stage.widthProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setWidth(newVal.intValue()));
         stage.heightProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setHeight(newVal.intValue()));
+
+        stage.getIcons().add(new Image(FileUtils.getResourceAsStream("icon.png", isDebug)));
         stage.show();
 
         Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> currentLocalDateTime = LocalDateTime.now()));
