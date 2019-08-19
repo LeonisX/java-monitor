@@ -3,8 +3,8 @@ package md.leonis.monitor;
 import md.leonis.monitor.config.Config;
 import md.leonis.monitor.model.Stats;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class FileUtils {
 
-    private static final Log LOGGER = LogFactory.getLog(FileUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
 
     private static final Yaml YAML = createYaml();
 

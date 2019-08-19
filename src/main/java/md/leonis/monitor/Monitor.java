@@ -27,8 +27,8 @@ import md.leonis.monitor.model.Stats;
 import md.leonis.monitor.source.HttpSource;
 import md.leonis.monitor.source.JdbcSource;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 
 public class Monitor extends Application {
 
-    private static final Log LOGGER = LogFactory.getLog(FileUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Monitor.class);
 
     private static Config config = ConfigHolder.getInstance();
     private static GuiConfig gui = config.getGui();
@@ -78,8 +78,6 @@ public class Monitor extends Application {
 
     @Override
     public void start(Stage stage) {
-        LoggerUtils.disableApacheHttpLogs();
-
         String version = Monitor.class.getPackage().getImplementationVersion();
         boolean isDebug = (version == null);
         LOGGER.info(String.format("Java Monitor %s starts...%n", isDebug ? "Dev" : version));
