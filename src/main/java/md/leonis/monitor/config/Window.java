@@ -4,6 +4,7 @@ public class Window {
 
     private int width = 900;
     private int height = 640;
+    private boolean maximized = false;
 
     public int getWidth() {
         return width;
@@ -19,5 +20,13 @@ public class Window {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public boolean isMaximized() {
+        return maximized;
+    }
+
+    public void setMaximized(boolean maximized) {
+        this.maximized = maximized;
     }
 }

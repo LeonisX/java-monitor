@@ -245,8 +245,18 @@ public class Monitor extends Application {
         stage.setScene(new Scene(pane, gui.getWindow().getWidth(), gui.getWindow().getHeight()));
         stage.setWidth(gui.getWindow().getWidth());
         stage.setHeight(gui.getWindow().getHeight());
-        stage.widthProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setWidth(newVal.intValue()));
-        stage.heightProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setHeight(newVal.intValue()));
+        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
+            if (!stage.isMaximized()) {
+                gui.getWindow().setWidth(newVal.intValue());
+            }
+        });
+        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+            if (!stage.isMaximized()) {
+                gui.getWindow().setHeight(newVal.intValue());
+            }
+        });
+        stage.setMaximized(gui.getWindow().isMaximized());
+        stage.maximizedProperty().addListener((obs, oldVal, newVal) -> gui.getWindow().setMaximized(newVal));
 
         stage.getIcons().add(new Image(FileUtils.getResourceAsStream("icon.png", isDebug)));
         stage.show();

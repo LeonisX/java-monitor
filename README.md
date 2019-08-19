@@ -45,6 +45,7 @@ All settings are collected in the `config.yml` file. `YAML` allows us to conveni
 #### Interface Settings
 
 * `window.width` and` window.height`: the width and height of the window, respectively.
+* `window.maximized`: state of the window: maximized or not. The default is `false`.
 
 #### Charts Settings
 
@@ -248,6 +249,7 @@ Used technologies
 Wishlist
 --------
 
+* Non-transparent icon
 * Path to dumps (test remote too)
 * Autorun. Manual Play/Stop
 * Console-only version

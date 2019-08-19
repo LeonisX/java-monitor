@@ -5,6 +5,7 @@ gui:
   window:
     width: 900
     height: 650
+    maximized: false
 
   charts:
     horizontalScale: 1.0

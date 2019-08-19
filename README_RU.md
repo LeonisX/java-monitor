@@ -45,6 +45,7 @@ Universal Monitoring Tool
 #### Настройки интерфейса
 
 * `window.width` и `window.height`: ширина и высота окна соответственно.
+* `window.maximized`: состояние окна: распахнутое или нет. По умолчанию `false`.
 
 #### Настройка графиков
 
