@@ -29,8 +29,8 @@ Installation and setup
 ---------------------
 
 * Compile project: `mvn clean package`
-* Copy the file `java-monitor.jar` from the directory `./target` to the directory `./example`.
-* Configure `config.yml`
+* Unzip archive `java-monitor-%.%.zip` in the `./target` directory.
+* **Configure** `config.yml`
 * Run `launcher.bat`, or manually: `java -jar java-monitor.jar`.
 
 ### Settings File
@@ -251,7 +251,6 @@ Wishlist
 * Path to dumps (test remote too)
 * Autorun. Manual Play/Stop
 * Console-only version
-* build ZIP archive with all necessary files (see mdm-monitoring)
 
 Where to read about metrics
 ---------------------------

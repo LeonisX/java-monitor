@@ -105,4 +105,16 @@ public class FileUtils {
 
         return new Yaml(representer, options);
     }
+
+    static InputStream getResourceAsStream(String path, boolean isDebug) {
+        if (isDebug) {
+            try {
+                return new BufferedInputStream(new FileInputStream(FileUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath() + path));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return new BufferedInputStream(FileUtils.class.getClassLoader().getResourceAsStream(path));
+        }
+    }
 }

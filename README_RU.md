@@ -29,8 +29,8 @@ Universal Monitoring Tool
 ---------------------
 
 * Скомпилировать проект: `mvn clean package`
-* Скопировать файл `java-monitor.jar` из каталога `./target` в каталог `./example`.
-* Настроить `config.yml`
+* Распаковать архив `java-monitor-%.%.zip` в каталоге `./target`.
+* **Настроить** `config.yml`
 * Запустить `launcher.bat`, или вручную: `java -jar java-monitor.jar`.
 
 ### Файл настроек

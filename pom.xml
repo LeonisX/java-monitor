@@ -6,7 +6,7 @@
 
     <groupId>md.leonis</groupId>
     <artifactId>java-monitor</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -59,35 +59,47 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>md.leonis.monitor.Monitor</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <finalName>java-monitor</finalName>
-                        </configuration>
+                        <id>jar-with-dependencies</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
+                        <configuration>
+                            <finalName>${project.artifactId}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>md.leonis.monitor.Monitor</mainClass>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>assemble-all</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
+        <finalName>${project.artifactId}-${project.version}</finalName> <!--default-->
     </build>
 
 </project>
