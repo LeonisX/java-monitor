@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="650.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/8.0.171"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="md.leonis.monitor.MonitorController">
+    <bottom>
+        <HBox fx:id="hBox" alignment="CENTER" spacing="5.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="5.0" top="5.0"/>
+            </padding>
+            <Label text="Chart Tick Unit:"/>
+            <TextField fx:id="tickUnitTextField" onKeyReleased="#tickUnitTextFieldKeyReleased" prefWidth="60.0"/>
+            <Label text="Chat Upper Bound:"/>
+            <TextField fx:id="upperBoundTextField" onKeyReleased="#upperBoundTextFieldKeyReleased" prefWidth="60.0"/>
+            <Label layoutX="357.0" layoutY="14.0">
+                <padding>
+                    <Insets left="30.0"/>
+                </padding>
+            </Label>
+            <Button fx:id="fastBackward" mnemonicParsing="false" onAction="#fastBackwardOnAction" text=" &lt;&lt;&lt; "/>
+            <Button fx:id="backward" layoutX="437.0" layoutY="10.0" mnemonicParsing="false" onAction="#backwardOnAction" text=" &lt;&lt; "/>
+            <Button fx:id="fastForward" layoutX="457.0" layoutY="10.0" mnemonicParsing="false" onAction="#fastForwardOnAction" text=" &gt;&gt; "/>
+            <Button fx:id="forward" layoutX="478.0" layoutY="10.0" mnemonicParsing="false" onAction="#forwardOnAction" text=" &gt;&gt;&gt; "/>
+            <Label fx:id="offsetLabel" layoutX="220.0" layoutY="14.0">
+                <padding>
+                    <Insets right="30.0"/>
+                </padding>
+            </Label>
+            <Button fx:id="plus" layoutX="519.0" layoutY="10.0" mnemonicParsing="false" onAction="#plusOnAction" text=" + "/>
+            <Button fx:id="minus" layoutX="539.0" layoutY="10.0" mnemonicParsing="false" onAction="#minusOnAction" text=" - "/>
+            <Label fx:id="pageLabel" layoutX="234.0" layoutY="14.0"/>
+        </HBox>
+    </bottom>
+</BorderPane>
