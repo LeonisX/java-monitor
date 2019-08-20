@@ -14,7 +14,7 @@ class ConsoleMonitor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleMonitor.class);
 
-    private final MonitorCore core;
+    private final MonitorEngine engine;
 
     public static void main(String[] args) {
         new ConsoleMonitor();
@@ -25,8 +25,8 @@ class ConsoleMonitor {
         boolean isDebug = (version == null);
         LOGGER.info(String.format("Java Console Monitor %s starts...%n", isDebug ? "Dev" : version));
 
-        core = new MonitorCore();
-        Runtime.getRuntime().addShutdownHook(new Thread(core::saveStats));
+        engine = new MonitorEngine();
+        Runtime.getRuntime().addShutdownHook(new Thread(engine::saveStats));
 
         start();
 
@@ -42,11 +42,11 @@ class ConsoleMonitor {
     private void start() {
         Config config = ConfigHolder.getInstance();
         ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
-        pool.scheduleAtFixedRate(() -> core.setCurrentLocalDateTime(LocalDateTime.now()), 0, config.getRequestIntervalInSeconds(), TimeUnit.SECONDS); // set time for other tasks
-        pool.scheduleAtFixedRate(() -> core.setCurrentLocalDateTime(LocalDateTime.now()), 0, config.getSaveStateIntervalInSeconds(), TimeUnit.SECONDS); // save metrics and config
+        pool.scheduleAtFixedRate(() -> engine.setCurrentLocalDateTime(LocalDateTime.now()), 0, config.getRequestIntervalInSeconds(), TimeUnit.SECONDS); // set time for other tasks
+        pool.scheduleAtFixedRate(() -> engine.setCurrentLocalDateTime(LocalDateTime.now()), 0, config.getSaveStateIntervalInSeconds(), TimeUnit.SECONDS); // save metrics and config
 
         for (Task task : config.getTasks()) {
-            pool.scheduleAtFixedRate(() -> core.getStats(task), task.getTimeOffsetInSeconds(), config.getRequestIntervalInSeconds(), TimeUnit.SECONDS); // regular tasks
+            pool.scheduleAtFixedRate(() -> engine.getStats(task), task.getTimeOffsetInSeconds(), config.getRequestIntervalInSeconds(), TimeUnit.SECONDS); // regular tasks
         }
     }
 }

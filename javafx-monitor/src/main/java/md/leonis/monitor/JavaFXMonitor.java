@@ -41,7 +41,7 @@ public class JavaFXMonitor extends Application {
     private static List<Chart> charts = gui.getCharts().getItems();
     private static List<Task> tasks = config.getTasks();
 
-    private MonitorCore core;
+    private MonitorEngine engine;
 
     private List<LineChart> chartList = new ArrayList<>();
     private List<List<XYChart.Series<String, Long>>> chartsDataList;
@@ -60,7 +60,7 @@ public class JavaFXMonitor extends Application {
 
     @Override
     public void init() {
-        core = new MonitorCore();
+        engine = new MonitorEngine();
 
         canDisplay = !tasks.isEmpty() && !charts.isEmpty();
 
@@ -70,7 +70,7 @@ public class JavaFXMonitor extends Application {
         }
 
         if (canDisplay) {
-            chartOffset = Math.max(0, core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+            chartOffset = Math.max(0, engine.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
         }
 
         // List of lists of Series data
@@ -78,7 +78,7 @@ public class JavaFXMonitor extends Application {
         tasks.forEach(task ->
                 task.getMetrics().forEach(metric -> {
                     if (metric.getChartId() != null) {
-                        Integer chartId = core.getChartsByIdMap().get(metric.getChartId());
+                        Integer chartId = engine.getChartsByIdMap().get(metric.getChartId());
                         if (chartId != null) {
                             chartsDataList.get(chartId).add(new XYChart.Series<>(metric.getName(), FXCollections.observableArrayList()));
                         }
@@ -114,7 +114,7 @@ public class JavaFXMonitor extends Application {
         if (canDisplay) {
             pane.setCenter(tabPane);
         } else {
-            pane.setCenter(new Label(MonitorCore.NO_TASKS));
+            pane.setCenter(new Label(MonitorEngine.NO_TASKS));
         }
 
         Button fastBackward = new Button(" <<< ");
@@ -130,13 +130,13 @@ public class JavaFXMonitor extends Application {
         });
         Button fastForward = new Button(" >>> ");
         fastForward.setOnAction(e -> {
-            chartOffset = core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale);
+            chartOffset = engine.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
         Button forward = new Button(" >> ");
         forward.setOnAction(e -> {
-            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), engine.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
@@ -144,7 +144,7 @@ public class JavaFXMonitor extends Application {
         plus.setOnAction(e -> {
             chartScale *= 2;
             gui.getCharts().setHorizontalScale(chartScale);
-            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), core.getStatsList().get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
+            chartOffset = Math.min(chartOffset + (int) (chartPageSize * chartScale), engine.getStatsList().get(0).getMetrics().size()) - (int) (chartPageSize * chartScale);
             chartOffset = Math.max(chartOffset, 0);
             fillCharts();
         });
@@ -208,7 +208,7 @@ public class JavaFXMonitor extends Application {
         pane.setBottom(hBox);
         pane.getStylesheets().add("modena.css");
 
-        stage.setTitle("Java Monitor");
+        stage.setTitle("Java Monitor" + (isDebug ? "" : " " + version));
         stage.setScene(new Scene(pane, gui.getWindow().getWidth(), gui.getWindow().getHeight()));
         stage.setWidth(gui.getWindow().getWidth());
         stage.setHeight(gui.getWindow().getHeight());
@@ -248,8 +248,8 @@ public class JavaFXMonitor extends Application {
 
     private void fillCharts() {
         if (canDisplay) {
-            int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), core.getStatsList().get(0).getMetrics().size());
-            List<List<MetricsWithDate>> subLists = core.getStatsList().stream().map(stats -> {
+            int toIndex = Math.min(chartOffset + (int) (chartPageSize * chartScale), engine.getStatsList().get(0).getMetrics().size());
+            List<List<MetricsWithDate>> subLists = engine.getStatsList().stream().map(stats -> {
                 if (toIndex > stats.getMetrics().size()) {
                     return new ArrayList<MetricsWithDate>();
                 } else {
@@ -261,8 +261,8 @@ public class JavaFXMonitor extends Application {
                 for (XYChart.Series<String, Long> d : series) {
                     String name = d.getName();
 
-                    List<XYChart.Data<String, Long>> dataList = subLists.get(core.getTaskIdByMetricNameMap().get(name)).stream().map(s -> {
-                        Metric metric = core.getChartMetricsByNameMap().get(name);
+                    List<XYChart.Data<String, Long>> dataList = subLists.get(engine.getTaskIdByMetricNameMap().get(name)).stream().map(s -> {
+                        Metric metric = engine.getChartMetricsByNameMap().get(name);
                         Long value = s.getMetrics().get(name);
                         if (metric.getIncrement() != null) {
                             value += metric.getIncrement();
@@ -278,7 +278,7 @@ public class JavaFXMonitor extends Application {
                 }
             }
 
-            offsetLabel.setText(String.format("[%s - %s] of %s", chartOffset, toIndex, core.getStatsList().get(0).getMetrics().size()));
+            offsetLabel.setText(String.format("[%s - %s] of %s", chartOffset, toIndex, engine.getStatsList().get(0).getMetrics().size()));
             pageLabel.setText(String.format("Page size: %s", (int) (chartPageSize * chartScale)));
 
         }
@@ -319,7 +319,7 @@ public class JavaFXMonitor extends Application {
     }
 
     private void start() {
-        Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> core.setCurrentLocalDateTime(LocalDateTime.now())));
+        Timeline etalonTimeLine = new Timeline(new KeyFrame(Duration.seconds(config.getRequestIntervalInSeconds()), ae -> engine.setCurrentLocalDateTime(LocalDateTime.now())));
         etalonTimeLine.setCycleCount(Animation.INDEFINITE);
         etalonTimeLine.play();
 
@@ -334,18 +334,18 @@ public class JavaFXMonitor extends Application {
         pt.getChildren().addAll(timelineList);
         pt.play();
 
-        Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> core.saveStats()));
+        Timeline saveTimeline = new Timeline(new KeyFrame(Duration.minutes(config.getSaveStateIntervalInSeconds()), ae -> engine.saveStats()));
         saveTimeline.setCycleCount(Animation.INDEFINITE);
         saveTimeline.play();
     }
 
     private void getStats(Task task) {
-        boolean isLast = chartOffset + (int) (chartPageSize * chartScale) >= core.getStatsList().get(0).getMetrics().size();
+        boolean isLast = chartOffset + (int) (chartPageSize * chartScale) >= engine.getStatsList().get(0).getMetrics().size();
 
-        core.getStats(task);
+        engine.getStats(task);
 
         if (isLast) {
-            chartOffset = Math.max(0, core.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
+            chartOffset = Math.max(0, engine.getStatsList().get(0).getMetrics().size() - (int) (chartPageSize * chartScale));
         }
 
         fillCharts();
@@ -353,6 +353,6 @@ public class JavaFXMonitor extends Application {
 
     @Override
     public void stop() {
-        core.saveStats();
+        engine.saveStats();
     }
 }

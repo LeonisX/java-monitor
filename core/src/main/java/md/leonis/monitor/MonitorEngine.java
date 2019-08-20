@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class MonitorCore {
+class MonitorEngine {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MonitorCore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MonitorEngine.class);
 
     private static Config config = ConfigHolder.getInstance();
     private static GuiConfig gui = config.getGui();
@@ -39,8 +39,7 @@ class MonitorCore {
 
     private volatile LocalDateTime currentLocalDateTime;
 
-    MonitorCore() {
-
+    MonitorEngine() {
         statsList = tasks.stream().map(task -> FileUtils.loadStats(task.getName())).collect(Collectors.toList());
 
         // List of LineChart

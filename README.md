@@ -31,7 +31,7 @@ Installation and setup
 
 ### Console version
 
-Performs tasks and saves execution results without displaying on the screen.
+Performs tasks and saves execution results without displaying on the screen. In the future, the files with the results can be viewed in the window version.
 
 * Unzip archive `console-monitor-%.%.zip` in the `./console-monitor/target` directory.
 * **Configure** `config.yml`
@@ -263,6 +263,8 @@ Used technologies
 Wishlist
 --------
 
+* Write logs to file
+* Log level
 * Path to dumps (test remote too)
 * Autorun. Manual Play/Stop
 
