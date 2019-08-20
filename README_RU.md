@@ -230,6 +230,80 @@ tasks:
 По умолчанию: `0`.
 * `multiplier`: умножить значение метрики на определённое вещественное число. По умолчанию: `0.0`.
 
+Настройки логирования
+---------------------
+
+Библиотека для логирования `SLF4J` позволяет гибко себя настраивать. В проекте используется `SimpleLogger`.
+
+Настройка производится путём передачи нужных параметров при запуске из командной строки. Пример:
+
+`java -Dorg.slf4j.simpleLogger.defaultLogLevel=trace -Dorg.slf4j.simpleLogger.logFile=путь-к-файлу-логов -jar console-monitor.jar`
+
+### Список настроек SimpleLogger:
+
+Этот логгер отличается тем, что отправляет все сообщения со всех логгеров в `System.err`. Все доступные настройки:
+
+Уровень логирования, принимаемый по умолчанию для всех экземпляров SimpleLogger.
+Возможные значения: "`trace`", "`debug`", "`info`", "`warn`", или "`error`"
+Значение по умолчанию: "`info`".
+
+`org.slf4j.simpleLogger.defaultLogLevel=info`
+
+Уровень логирования для экземпляра логгера "`a.b.c`".
+Значение может быть: "`trace`", "`debug`", "`info`", "`warn`", "`error`" или "`off`".
+При инициализации логгера "`a.b.c`" он получает уровень, заданный в этом свойстве.
+Если уровень не указан, то принимается уровень ближайшего родительского логгера, а если такового нет, то
+значение, указанное параметром `org.slf4j.simpleLogger.defaultLogLevel`.
+
+```
+org.slf4j.simpleLogger.log.org.apache.http.wire=warn
+org.slf4j.simpleLogger.log.org.apache.http=warn
+org.slf4j.simpleLogger.log.org.apache.http.impl.conn=warn
+org.slf4j.simpleLogger.log.org.apache.http.impl.client=warn
+org.slf4j.simpleLogger.log.org.apache.http.client=warn
+```
+
+Логирование текущих даты и времени. По умолчанию `false`.
+
+`org.slf4j.simpleLogger.showDateTime=true`
+
+Формат даты и времени. Форматирование аналогичное `java.text.SimpleDateFormat`.
+Если формат не указан или он неверный, то будет выводиться количество миллисекунд, прошедших после старта вывода сообщений.
+
+`org.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss`
+
+Логирование название текущего потока. По умолчани `true`.
+
+`org.slf4j.simpleLogger.showThreadName=false`
+
+Логирование названия логгера. По умолчани `true`. Пример: `md.leonis.Monitor`.
+
+`org.slf4j.simpleLogger.showLogName=false`
+
+Логирование только последнего компонента из названия логгера. Пример: `Monitor`. По умолчанию `false`.
+
+`org.slf4j.simpleLogger.showShortLogName=false`
+
+Заключать строку уровня в квадратные кавычки. По умолчанию `false`.
+
+`org.slf4j.simpleLogger.levelInBrackets=true`
+
+Замена для уровня логирования `warn`. По умолчанию: `WARN`.
+
+`# org.slf4j.simpleLogger.warnLevelString=ACHTUNG`
+
+Куда выводить логи. Здесь либо путь к файлу, либоб специальные значения "`System.out`" или "`System.err`". 
+По умолчанию "`System.err`".
+
+`# org.slf4j.simpleLogger.logFile=your-file-path`
+
+Если логи выводятся в "`System.out`" или "`System.err`", то по умолчанию логи будут выводиться по последнему значению,
+указанному в переменных `System.out/err`. Если установить это значение в `true`, то выходной поток кешируется,
+то есть, один раз назначается во время инициализации и используется повторно независимо от текущего значения, на которое ссылаются `System.out/err`.
+
+`# org.slf4j.simpleLogger.cacheOutputStream=true`
+
+
 Использование
 -------------
 

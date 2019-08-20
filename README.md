@@ -228,6 +228,87 @@ It is very convenient, for example, if we collect HTTP statuses from several sit
 Default: `0`.
 * `multiplier`: multiply the metric value by a specific real number. Default: `0.0`.
 
+Logging Settings
+----------------
+
+The logging library `SLF4J` allows you to flexibly configure yourself. The project uses `SimpleLogger`.
+
+Setup is done by passing the necessary parameters at startup from the command line. Example:
+
+`java -Dorg.slf4j.simpleLogger.defaultLogLevel=trace -Dorg.slf4j.simpleLogger.logFile=your-file-path -jar console-monitor.jar`
+
+### SimpleLogger settings list:
+
+Simple implementation of Logger that sends all enabled log messages, for all defined loggers, to System.err.
+
+Default logging detail level for all instances of SimpleLogger.
+Must be one of ("trace", "debug", "info", "warn", or "error").
+If not specified, defaults to "info".
+
+`org.slf4j.simpleLogger.defaultLogLevel=info`
+
+Logging detail level for a SimpleLogger instance named "a.b.c".
+Right-side value must be one of "trace", "debug", "info", "warn", "error" or "off".
+When a SimpleLogger named "a.b.c" is initialized, its level is assigned from this property.
+If unspecified, the level of nearest parent logger will be used, and if none is set,
+then the value specified by org.slf4j.simpleLogger.defaultLogLevel will be used.
+
+```
+org.slf4j.simpleLogger.log.org.apache.http.wire=warn
+org.slf4j.simpleLogger.log.org.apache.http=warn
+org.slf4j.simpleLogger.log.org.apache.http.impl.conn=warn
+org.slf4j.simpleLogger.log.org.apache.http.impl.client=warn
+org.slf4j.simpleLogger.log.org.apache.http.client=warn
+```
+
+Set to true if you want the current date and time to be included in output messages.
+Default is false.
+
+`org.slf4j.simpleLogger.showDateTime=true`
+
+The date and time format to be used in the output messages.
+The pattern describing the date and time format is the same that is used in java.text.SimpleDateFormat.
+If the format is not specified or is invalid, the number of milliseconds since start up will be output.
+
+`org.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd HH:mm:ss`
+
+Set to true if you want to output the current thread name.
+Defaults to true.
+
+`org.slf4j.simpleLogger.showThreadName=false`
+
+Set to true if you want the Logger instance name to be included in output messages. Example: `md.leonis.Monitor`.
+Defaults to true.
+
+`org.slf4j.simpleLogger.showLogName=false`
+
+Set to true if you want the last component of the name to be included in output messages. Example: `Monitor`.
+Defaults to false.
+
+`org.slf4j.simpleLogger.showShortLogName=false`
+
+Should the level string be output in brackets?
+Defaults to false.
+
+`org.slf4j.simpleLogger.levelInBrackets=true`
+
+The string value output for the warn level. Defaults to WARN.
+
+`# org.slf4j.simpleLogger.warnLevelString=ACHTUNG`
+
+The output target which can be the path to a file, or the special values "System.out" and "System.err".
+Default is "System.err".
+
+`# org.slf4j.simpleLogger.logFile=your-file-path`
+
+If the output target is set to "System.out" or "System.err" (see preceding entry), by default,
+logs will be output to the latest value referenced by System.out/err variables.
+By setting this parameter to true, the output stream will be cached, i.e. assigned once at
+initialization time and re-used independently of the current value referenced by System.out/err.
+
+`# org.slf4j.simpleLogger.cacheOutputStream=true`
+
+
 Using
 -----
 
@@ -263,8 +344,6 @@ Used technologies
 Wishlist
 --------
 
-* Write logs to file
-* Log level
 * Path to dumps (test remote too)
 * Autorun. Manual Play/Stop
 
