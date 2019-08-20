@@ -26,7 +26,7 @@ public class JavaFXMonitor extends Application {
     public void start(Stage stage) {
         Parent root = null;
         try {
-            loader = new FXMLLoader(ClassLoader.getSystemResource("MonitorScene.fxml"));
+            loader = new FXMLLoader(ClassLoader.getSystemResource("Monitor.fxml"));
             root = loader.load();
         } catch (IOException e) {
             LOGGER.error("Can't load main scene!");
