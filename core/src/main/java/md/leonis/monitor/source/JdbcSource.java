@@ -30,7 +30,8 @@ public class JdbcSource {
             statement.close();
             connection.close();
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error("Error completing task {}! {}", task.getName(), e.getMessage());
+            LOGGER.debug("Error completing task {}!", task.getName(), e);
         }
         return FileUtils.secureMap(safeMap);
     }

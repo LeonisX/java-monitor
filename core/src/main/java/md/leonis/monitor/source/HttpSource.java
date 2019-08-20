@@ -3,6 +3,7 @@ package md.leonis.monitor.source;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import md.leonis.monitor.FileUtils;
+import md.leonis.monitor.HttpException;
 import md.leonis.monitor.config.Authentication;
 import md.leonis.monitor.config.Task;
 import org.apache.http.HttpResponse;
@@ -30,8 +31,6 @@ public class HttpSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpSource.class);
 
     private static final String STATUS_CODE = "StatusCode";
-
-    private static int retryCount = 0;
 
     public static Map<String, Long> executeTask(Task task) {
         LOGGER.debug("Run task: {}", task.getName());
@@ -82,12 +81,9 @@ public class HttpSource {
                     throw new RuntimeException(String.format("Can't process %s data type :(", task.getResponseFormat()));
             }
         } catch (Exception e) {
-            if (retryCount > 3) {
-                throw new RuntimeException("retryCount > " + retryCount, e);
-            } else {
-                retryCount++;
-            }
-            return executeTask(task);
+            LOGGER.error("Error completing task {}! {}", task.getName(), e.getMessage());
+            LOGGER.debug("Error completing task {}!", task.getName(), e);
+            return new HashMap<>();
         }
     }
 
@@ -95,14 +91,13 @@ public class HttpSource {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), StandardCharsets.UTF_8))) {
             String responseBody = br.lines().collect(Collectors.joining());
             if (response.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("status: " + response.getStatusLine() + "; responseBody: " + responseBody);
+                throw new HttpException(response.getStatusLine(), responseBody);
             }
 
             Map<String, Long> map = FileUtils.secureMap(new ObjectMapper().readValue(responseBody, new TypeReference<Map<String, String>>() {
             }));
 
             EntityUtils.consume(response.getEntity());
-            retryCount = 0;
             return map;
         }
     }
@@ -111,7 +106,6 @@ public class HttpSource {
         Map<String, Long> map = new HashMap<>();
         map.put(String.format("%s_%s", name, STATUS_CODE), (long) response.getStatusLine().getStatusCode());
         EntityUtils.consume(response.getEntity());
-        retryCount = 0;
         return map;
     }
 }

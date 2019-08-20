@@ -264,13 +264,17 @@ public class JavaFXMonitor extends Application {
                     List<XYChart.Data<String, Long>> dataList = subLists.get(engine.getTaskIdByMetricNameMap().get(name)).stream().map(s -> {
                         Metric metric = engine.getChartMetricsByNameMap().get(name);
                         Long value = s.getMetrics().get(name);
-                        if (metric.getIncrement() != null) {
-                            value += metric.getIncrement();
+                        if (null == value) {
+                            return new XYChart.Data<>(s.toString(), -1L);
+                        } else {
+                            if (metric.getIncrement() != null) {
+                                value += metric.getIncrement();
+                            }
+                            if (metric.getMultiplier() != null) {
+                                value = (long) (value * metric.getMultiplier());
+                            }
+                            return new XYChart.Data<>(s.toString(), value);
                         }
-                        if (metric.getMultiplier() != null) {
-                            value = (long) (value * metric.getMultiplier());
-                        }
-                        return new XYChart.Data<>(s.toString(), value);
                     }).collect(Collectors.toList());
 
                     d.getData().clear();
